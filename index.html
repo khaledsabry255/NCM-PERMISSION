@@ -41,27 +41,34 @@ body{
   font-family:'IBM Plex Sans Arabic','Tajawal',sans-serif;
   color:var(--text-main);
   background:
-    radial-gradient(circle at 15% 10%, rgba(212,175,55,0.08), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(62,207,142,0.06), transparent 45%),
+    radial-gradient(circle at 12% 8%, rgba(212,175,55,0.10), transparent 42%),
+    radial-gradient(circle at 92% 78%, rgba(62,207,142,0.07), transparent 48%),
+    radial-gradient(circle at 50% 100%, rgba(212,175,55,0.05), transparent 55%),
     linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
   background-attachment:fixed;
 }
 
 .emblem{
   position:fixed;
-  top:-120px; left:50%;
+  top:-140px; left:50%;
   transform:translateX(-50%);
-  width:520px; height:520px;
+  width:600px; height:600px;
   border-radius:50%;
-  border:1px dashed rgba(212,175,55,0.18);
+  border:1px dashed rgba(212,175,55,0.16);
   pointer-events:none;
   z-index:0;
 }
 .emblem::before{
   content:"";
-  position:absolute; inset:40px;
+  position:absolute; inset:44px;
   border-radius:50%;
-  border:1px solid rgba(212,175,55,0.12);
+  border:1px solid rgba(212,175,55,0.10);
+}
+.emblem::after{
+  content:"";
+  position:absolute; inset:88px;
+  border-radius:50%;
+  border:1px solid rgba(212,175,55,0.07);
 }
 
 .wrap{
@@ -72,33 +79,73 @@ body{
 }
 
 header.top{
-  text-align:center;
-  margin-bottom:28px;
+  margin-bottom:10px;
 }
-header.top .eyebrow{
-  font-size:13px;
-  letter-spacing:2px;
-  color:var(--gold-soft);
-  text-transform:uppercase;
-  font-weight:600;
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:26px;
+}
+.brand-badge{
+  font-family:'Tajawal',sans-serif;
+  font-weight:900;
+  font-size:22px;
+  letter-spacing:2.5px;
+  color:#1a1305;
+  background:linear-gradient(135deg, var(--gold-soft), var(--gold) 55%, #a9822a);
+  padding:11px 24px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(212,175,55,0.4), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.15);
+  border:1px solid rgba(255,255,255,0.3);
+  position:relative;
+  white-space:nowrap;
+}
+.brand-badge.b-ncm{ order:2; font-size:26px; }
+.brand-badge.b-name{ order:1; font-size:18px; letter-spacing:1.5px; }
+
+.title-block{
+  text-align:center;
 }
 header.top h1{
   font-family:'Tajawal',sans-serif;
   font-weight:900;
-  font-size:clamp(28px,5vw,40px);
-  margin:6px 0 4px;
+  font-size:clamp(26px,4.4vw,36px);
+  margin:0 0 10px;
+  letter-spacing:.5px;
 }
-header.top p{
-  color:var(--text-dim);
-  font-size:14px;
-  margin:0;
+.title-rule{
+  width:120px;
+  height:2px;
+  margin:0 auto;
+  background:linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
 }
+.section-kicker{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  font-family:'Tajawal',sans-serif;
+  font-weight:900;
+  font-size:clamp(14px,2.4vw,18px);
+  letter-spacing:5px;
+  color:var(--gold-soft);
+  margin:26px 0 6px;
+}
+.section-kicker::before, .section-kicker::after{
+  content:"";
+  height:1px;
+  width:44px;
+  background:linear-gradient(90deg, transparent, rgba(212,175,55,0.5));
+}
+.section-kicker::after{ background:linear-gradient(90deg, rgba(212,175,55,0.5), transparent); }
 
 .tabs{
   display:flex;
   gap:10px;
   justify-content:center;
-  margin:26px 0 22px;
+  margin:10px 0 22px;
 }
 .tab-btn{
   flex:1;
@@ -116,10 +163,11 @@ header.top p{
   cursor:pointer;
   transition:all .2s ease;
 }
+.tab-btn:hover{ border-color:rgba(212,175,55,0.4); }
 .tab-btn.active{
-  background:linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.08));
+  background:linear-gradient(135deg, rgba(212,175,55,0.26), rgba(212,175,55,0.08));
   border-color:var(--gold);
-  box-shadow:0 0 0 1px rgba(212,175,55,0.25) inset;
+  box-shadow:0 0 0 1px rgba(212,175,55,0.3) inset, 0 8px 20px rgba(212,175,55,0.15);
 }
 
 .search-card{
@@ -128,8 +176,8 @@ header.top p{
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
   border-radius:20px;
-  padding:22px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  padding:24px;
+  box-shadow:0 24px 70px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 .search-row{
   display:flex;
@@ -140,25 +188,29 @@ header.top p{
   padding:15px 18px;
   border-radius:12px;
   border:1px solid var(--glass-border);
-  background:rgba(0,0,0,0.2);
+  background:rgba(0,0,0,0.25);
   color:var(--text-main);
   font-family:inherit;
   font-size:16px;
   outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
 }
 .search-row input::placeholder{color:var(--text-dim);}
-.search-row input:focus{border-color:var(--gold);}
+.search-row input:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
 .search-row button{
-  padding:0 24px;
+  padding:0 26px;
   border-radius:12px;
-  border:none;
-  background:var(--gold);
+  border:1px solid rgba(255,255,255,0.3);
+  background:linear-gradient(135deg, var(--gold-soft), var(--gold) 60%, #a9822a);
   color:#1a1305;
   font-family:inherit;
   font-weight:800;
   font-size:15px;
   cursor:pointer;
+  box-shadow:0 8px 22px rgba(212,175,55,0.3);
+  transition:transform .15s ease;
 }
+.search-row button:hover{ filter:brightness(1.05); }
 .search-row button:active{transform:translateY(1px);}
 .hint{
   margin-top:10px;
@@ -182,16 +234,15 @@ header.top p{
 }
 
 .person-card{
-  background:var(--glass);
-  border:1px solid var(--glass-border);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
+  background:#f4f1ea;
+  border:1px solid rgba(0,0,0,0.08);
   border-radius:18px;
   overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,0.25);
 }
 .person-head{
   padding:18px 20px;
-  border-bottom:1px solid var(--glass-border);
+  border-bottom:1px solid rgba(0,0,0,0.08);
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -203,15 +254,16 @@ header.top p{
   margin:0 0 3px;
   font-family:'Tajawal',sans-serif;
   font-weight:700;
+  color:#000;
 }
 .person-head .sub{
-  color:var(--text-dim);
+  color:#000;
   font-size:13px;
 }
 .count-badge{
-  background:rgba(212,175,55,0.16);
-  border:1px solid rgba(212,175,55,0.35);
-  color:var(--gold-soft);
+  background:rgba(212,175,55,0.22);
+  border:1px solid rgba(212,175,55,0.5);
+  color:#5c4813;
   font-size:12.5px;
   font-weight:700;
   padding:6px 12px;
@@ -221,52 +273,70 @@ header.top p{
 
 .occ{
   padding:16px 20px;
-  border-bottom:1px solid rgba(255,255,255,0.06);
+  border-bottom:1px solid rgba(0,0,0,0.08);
 }
 .occ:last-child{border-bottom:none;}
 .occ-top{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:10px;
+  margin-bottom:12px;
   gap:10px;
   flex-wrap:wrap;
 }
 .occ-label{
   font-size:13px;
   font-weight:700;
-  color:var(--gold-soft);
+  color:#7a5c12;
 }
-.permit-badge{
-  padding:6px 14px;
-  border-radius:100px;
-  font-size:13px;
-  font-weight:800;
-  border:1px solid transparent;
-  white-space:nowrap;
+
+.permit-tab{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:14px 18px;
+  border-radius:14px;
+  border:1.5px solid transparent;
+  margin-bottom:12px;
 }
-.pb-ok{background:var(--ok-bg); color:var(--ok); border-color:rgba(62,207,142,0.4);}
-.pb-soon{background:var(--soon-bg); color:var(--soon); border-color:rgba(240,193,75,0.4);}
-.pb-bad{background:var(--bad-bg); color:var(--bad); border-color:rgba(239,106,106,0.4);}
+.permit-tab .pt-label{
+  font-size:12.5px;
+  font-weight:700;
+  opacity:.85;
+}
+.permit-tab .pt-value{
+  font-size:17px;
+  font-weight:900;
+}
+.pb-ok{background:var(--ok-bg); color:#0d6b45; border-color:rgba(62,207,142,0.5);}
+.pb-soon{background:var(--soon-bg); color:#7a5c12; border-color:rgba(240,193,75,0.5);}
+.pb-bad{background:var(--bad-bg); color:#8a2c2c; border-color:rgba(239,106,106,0.5);}
 .pb-ban{background:var(--ban); color:#fff; border-color:var(--ban);}
-.pb-unclear{background:var(--unclear-bg); color:var(--unclear); border-color:rgba(168,181,178,0.4);}
+.pb-unclear{background:var(--unclear-bg); color:#3d4443; border-color:rgba(168,181,178,0.5);}
 
 .fields{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
-  gap:8px 16px;
+  grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
+  gap:10px;
 }
 .field{
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:12px;
+  padding:10px 12px;
   font-size:14px;
 }
 .field .k{
-  color:var(--text-dim);
-  font-size:11.5px;
+  color:#5c5c56;
+  font-size:11px;
   display:block;
-  margin-bottom:2px;
+  margin-bottom:4px;
+  font-weight:600;
 }
 .field .v{
   font-weight:600;
+  color:#000;
 }
 
 .empty-state{
@@ -297,11 +367,17 @@ footer{
 
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">NCM &middot; إدارة التصاريح</div>
-    <h1>بحث التصاريح</h1>
-    <p>ابحث بالرقم القومى أو الاسم للأفراد، أو برقم اللوحة للمركبات</p>
+    <div class="header-row">
+      <div class="brand-badge b-name">KHALED SABRY</div>
+      <div class="brand-badge b-ncm">NCM</div>
+    </div>
+    <div class="title-block">
+      <h1>بحث التصاريح</h1>
+      <div class="title-rule"></div>
+    </div>
   </header>
 
+  <div class="section-kicker">PERMISSION SEARCH</div>
   <div class="tabs">
     <button class="tab-btn active" data-tab="individuals">🧑 الأفراد</button>
     <button class="tab-btn" data-tab="vehicles">🚗 المركبات</button>
@@ -314,7 +390,6 @@ footer{
         <input id="ind-input" type="text" placeholder="اكتب الرقم القومى أو الاسم بالكامل ثم Enter">
         <button id="ind-btn">بحث</button>
       </div>
-      <div class="hint">البحث مطابقة تامة (Exact match) بالرقم القومى أو بالاسم كامل زي ما هو مكتوب بالشيت.</div>
     </div>
     <div class="status-line" id="ind-status">جاري تحميل بيانات الأفراد...</div>
     <div class="results" id="ind-results"></div>
@@ -327,7 +402,6 @@ footer{
         <input id="veh-input" type="text" placeholder="اكتب رقم السيارة ثم Enter">
         <button id="veh-btn">بحث</button>
       </div>
-      <div class="hint">البحث مطابقة تامة برقم السيارة زي ما هو مكتوب بالشيت.</div>
     </div>
     <div class="status-line" id="veh-status">جاري تحميل بيانات المركبات...</div>
     <div class="results" id="veh-results"></div>
@@ -537,7 +611,10 @@ function searchIndividuals(query){
       occ.innerHTML = `
         <div class="occ-top">
           <span class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</span>
-          <span class="permit-badge ${p.cls}">${escapeHtml(p.text)}</span>
+        </div>
+        <div class="permit-tab ${p.cls}">
+          <span class="pt-label">حالة التصريح</span>
+          <span class="pt-value">${escapeHtml(p.text)}</span>
         </div>
         <div class="fields">
           <div class="field"><span class="k">الوظيفة</span><span class="v">${escapeHtml(rec.job || "—")}</span></div>
@@ -637,7 +714,10 @@ function searchVehicles(query){
     occ.innerHTML = `
       <div class="occ-top">
         <span class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</span>
-        <span class="permit-badge ${p.cls}">${escapeHtml(p.text)}</span>
+      </div>
+      <div class="permit-tab ${p.cls}">
+        <span class="pt-label">حالة التصريح</span>
+        <span class="pt-value">${escapeHtml(p.text)}</span>
       </div>
       <div class="fields">
         <div class="field"><span class="k">النوع</span><span class="v">${escapeHtml(rec.type || "—")}</span></div>
