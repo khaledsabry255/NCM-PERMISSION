@@ -475,6 +475,14 @@ async function initIndividuals(){
     });
 
     statusEl.textContent = `تم تحميل ${rows.length} صف — ${individualsGroups.size} شخص (بعد تجميع التكرارات).`;
+
+    if(individualsGroups.size <= 2){
+      const headersFound = Object.keys(sample).join(" | ");
+      const firstDataRow = rows.find(r => normalize(r[K_ID]) || normalize(r[K_NAME]));
+      const sampleId = firstDataRow ? firstDataRow[K_ID] : "(لا يوجد)";
+      const sampleName = firstDataRow ? firstDataRow[K_NAME] : "(لا يوجد)";
+      statusEl.innerHTML += `<br><span style="color:#f0c14b">تشخيص: K_ID="${K_ID}" | K_NAME="${K_NAME}" | الأعمدة الموجودة: ${escapeHtml(headersFound)} | أول رقم قومى: ${escapeHtml(String(sampleId))} | أول اسم: ${escapeHtml(String(sampleName))}</span>`;
+    }
   }catch(err){
     const detail = (err && (err.message || err.toString())) || "غير معروف";
     statusEl.textContent = `حصل خطأ في تحميل بيانات الأفراد (${detail}). لو بتجرب الملف من على جهازك مباشرة (file://) ده السبب الأشهر — لازم يتفتح من على سيرفر (GitHub Pages) عشان يقدر يجيب البيانات من جوجل.`;
