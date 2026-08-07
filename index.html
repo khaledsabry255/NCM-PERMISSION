@@ -417,9 +417,24 @@ function findHeaderKey(sampleRow, target){
   return Object.keys(sampleRow).find(k => normalize(k) === target);
 }
 
+function loadCSVRaw(url){
+  return new Promise((resolve, reject)=>{
+    Papa.parse(url, {
+      download:true,
+      header:false,
+      skipEmptyLines:false,
+      complete: (res)=> resolve(res.data),
+      error: (err)=> reject(err)
+    });
+  });
+}
+
 /* ======================= Individuals ======================= */
 
 let individualsGroups = null; // Map key -> {name, nationalId, records:[...]}
+
+// Fixed column order in "تصاريح أفراد": م, م, الاسم, الوظيفة, الرقم القومى, العنوان, ملاحظات, المرسل, تصريح, Mali Day
+const IND_COL = { NAME:2, JOB:3, ID:4, ADDR:5, NOTE:6, SENDER:7, PERMIT:8, DAY:9 };
 
 async function initIndividuals(){
   const statusEl = document.getElementById("ind-status");
@@ -428,44 +443,34 @@ async function initIndividuals(){
     return;
   }
   try{
-    const rows = await loadCSV(INDIVIDUALS_CSV_URL);
-    const sample = rows.find(r => Object.keys(r).length) || {};
-    const K_ID   = findHeaderKey(sample, "الرقم القومى") || "الرقم القومى ";
-    const K_NAME = findHeaderKey(sample, "الاســــــــــم") || "الاســــــــــم";
-    const K_JOB  = findHeaderKey(sample, "الوظيفة");
-    const K_ADDR = findHeaderKey(sample, "العنوان") || "العنوان ";
-    const K_NOTE = findHeaderKey(sample, "ملاحظات");
-    const K_SEND = findHeaderKey(sample, "المرسل") || "المرسل ";
-    const K_PERM = findHeaderKey(sample, "تصريح");
-    const K_DAY  = findHeaderKey(sample, "Mali Day");
+    const rows = await loadCSVRaw(INDIVIDUALS_CSV_URL);
+    const dataRows = rows.slice(1); // skip header row
 
     individualsGroups = new Map();
 
-    rows.forEach(row=>{
-      const idVal = normalize(row[K_ID]);
-      const nameVal = normalize(row[K_NAME]);
+    dataRows.forEach(cols=>{
+      if(!cols || cols.length < 5) return;
+      const idVal = normalize(cols[IND_COL.ID]);
+      const nameVal = normalize(cols[IND_COL.NAME]);
       if(!idVal && !nameVal) return; // separator / empty row
 
       const key = idVal ? ("ID:"+digitsOnly(idVal)) : ("NAME:"+nameVal);
       if(!individualsGroups.has(key)){
-        individualsGroups.set(key, {
-          name:nameVal, nationalId:idVal, byName:new Map(), records:[]
-        });
+        individualsGroups.set(key, { name:nameVal, nationalId:idVal, records:[] });
       }
       const g = individualsGroups.get(key);
       g.records.push({
         name:nameVal, nationalId:idVal,
-        job: normalize(row[K_JOB]),
-        address: normalize(row[K_ADDR]),
-        note: normalize(row[K_NOTE]),
-        sender: normalize(row[K_SEND]),
-        permit: row[K_PERM],
-        day: row[K_DAY],
-        dayParsed: parseDateLoose(row[K_DAY])
+        job: normalize(cols[IND_COL.JOB]),
+        address: normalize(cols[IND_COL.ADDR]),
+        note: normalize(cols[IND_COL.NOTE]),
+        sender: normalize(cols[IND_COL.SENDER]),
+        permit: cols[IND_COL.PERMIT],
+        day: cols[IND_COL.DAY],
+        dayParsed: parseDateLoose(cols[IND_COL.DAY])
       });
     });
 
-    // also index by exact name for name-based search (separately, since IDs are the primary key)
     window.__individualsByName = new Map();
     individualsGroups.forEach((g)=>{
       const nameKey = normalize(g.name);
@@ -474,15 +479,7 @@ async function initIndividuals(){
       window.__individualsByName.get(nameKey).push(g);
     });
 
-    statusEl.textContent = `تم تحميل ${rows.length} صف — ${individualsGroups.size} شخص (بعد تجميع التكرارات).`;
-
-    if(individualsGroups.size <= 2){
-      const headersFound = Object.keys(sample).join(" | ");
-      const firstDataRow = rows.find(r => normalize(r[K_ID]) || normalize(r[K_NAME]));
-      const sampleId = firstDataRow ? firstDataRow[K_ID] : "(لا يوجد)";
-      const sampleName = firstDataRow ? firstDataRow[K_NAME] : "(لا يوجد)";
-      statusEl.innerHTML += `<br><span style="color:#f0c14b">تشخيص: K_ID="${K_ID}" | K_NAME="${K_NAME}" | الأعمدة الموجودة: ${escapeHtml(headersFound)} | أول رقم قومى: ${escapeHtml(String(sampleId))} | أول اسم: ${escapeHtml(String(sampleName))}</span>`;
-    }
+    statusEl.textContent = `تم تحميل ${dataRows.length} صف — ${individualsGroups.size} شخص (بعد تجميع التكرارات).`;
   }catch(err){
     const detail = (err && (err.message || err.toString())) || "غير معروف";
     statusEl.textContent = `حصل خطأ في تحميل بيانات الأفراد (${detail}). لو بتجرب الملف من على جهازك مباشرة (file://) ده السبب الأشهر — لازم يتفتح من على سيرفر (GitHub Pages) عشان يقدر يجيب البيانات من جوجل.`;
@@ -560,6 +557,9 @@ function searchIndividuals(query){
 
 let vehiclesGroups = null;
 
+// Fixed column order in "تصاريح مركبات": م, م, رقم السيارة, النوع, تابعه, تصريح, Mail Day
+const VEH_COL = { PLATE:2, TYPE:3, OWNER:4, PERMIT:5, DAY:6 };
+
 async function initVehicles(){
   const statusEl = document.getElementById("veh-status");
   if(VEHICLES_CSV_URL.startsWith("PUT_")){
@@ -567,18 +567,14 @@ async function initVehicles(){
     return;
   }
   try{
-    const rows = await loadCSV(VEHICLES_CSV_URL);
-    const sample = rows.find(r => Object.keys(r).length) || {};
-    const K_PLATE = findHeaderKey(sample, "رقم السيارة") || "رقم السيارة ";
-    const K_TYPE  = findHeaderKey(sample, "النوع");
-    const K_OWNER = findHeaderKey(sample, "تابعه");
-    const K_PERM  = findHeaderKey(sample, "تصريح");
-    const K_DAY   = findHeaderKey(sample, "Mail Day");
+    const rows = await loadCSVRaw(VEHICLES_CSV_URL);
+    const dataRows = rows.slice(1); // skip header row
 
     vehiclesGroups = new Map();
 
-    rows.forEach(row=>{
-      const plateVal = normalize(row[K_PLATE]);
+    dataRows.forEach(cols=>{
+      if(!cols || cols.length < 3) return;
+      const plateVal = normalize(cols[VEH_COL.PLATE]);
       if(!plateVal) return;
       const key = plateVal.replace(/\s+/g,"");
       if(!vehiclesGroups.has(key)){
@@ -586,15 +582,15 @@ async function initVehicles(){
       }
       vehiclesGroups.get(key).records.push({
         plate:plateVal,
-        type: normalize(row[K_TYPE]),
-        owner: normalize(row[K_OWNER]),
-        permit: row[K_PERM],
-        day: row[K_DAY],
-        dayParsed: parseDateLoose(row[K_DAY])
+        type: normalize(cols[VEH_COL.TYPE]),
+        owner: normalize(cols[VEH_COL.OWNER]),
+        permit: cols[VEH_COL.PERMIT],
+        day: cols[VEH_COL.DAY],
+        dayParsed: parseDateLoose(cols[VEH_COL.DAY])
       });
     });
 
-    statusEl.textContent = `تم تحميل ${rows.length} صف — ${vehiclesGroups.size} سيارة (بعد تجميع التكرارات).`;
+    statusEl.textContent = `تم تحميل ${dataRows.length} صف — ${vehiclesGroups.size} سيارة (بعد تجميع التكرارات).`;
   }catch(err){
     const detail = (err && (err.message || err.toString())) || "غير معروف";
     statusEl.textContent = `حصل خطأ في تحميل بيانات المركبات (${detail}). لو بتجرب الملف من على جهازك مباشرة (file://) ده السبب الأشهر — لازم يتفتح من على سيرفر (GitHub Pages) عشان يقدر يجيب البيانات من جوجل.`;
