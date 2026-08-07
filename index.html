@@ -234,36 +234,55 @@ header.top h1{
 }
 
 .person-card{
-  background:#f4f1ea;
-  border:1px solid rgba(0,0,0,0.08);
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
   border-radius:18px;
   overflow:hidden;
-  box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  box-shadow:0 20px 55px rgba(0,0,0,0.35);
 }
 .person-head{
   padding:18px 20px;
-  border-bottom:1px solid rgba(0,0,0,0.08);
+  border-bottom:1px solid var(--glass-border);
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:12px;
   flex-wrap:wrap;
 }
-.person-head h2{
-  font-size:19px;
-  margin:0 0 3px;
-  font-family:'Tajawal',sans-serif;
+.identity-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  flex:1;
+}
+.id-tab{
+  background:rgba(212,175,55,0.08);
+  border:1px solid rgba(212,175,55,0.3);
+  border-radius:12px;
+  padding:9px 14px;
+  min-width:140px;
+}
+.id-tab .k{
+  display:block;
+  font-size:10.5px;
+  color:var(--gold-soft);
   font-weight:700;
-  color:#000;
+  margin-bottom:2px;
+  letter-spacing:.5px;
 }
-.person-head .sub{
-  color:#000;
-  font-size:13px;
+.id-tab .v{
+  font-size:15px;
+  font-weight:700;
+  color:var(--text-main);
+  font-family:'Tajawal',sans-serif;
 }
+.id-tab-name{ flex:1.4; min-width:180px; }
 .count-badge{
-  background:rgba(212,175,55,0.22);
-  border:1px solid rgba(212,175,55,0.5);
-  color:#5c4813;
+  background:rgba(212,175,55,0.16);
+  border:1px solid rgba(212,175,55,0.4);
+  color:var(--gold-soft);
   font-size:12.5px;
   font-weight:700;
   padding:6px 12px;
@@ -273,21 +292,22 @@ header.top h1{
 
 .occ{
   padding:16px 20px;
-  border-bottom:1px solid rgba(0,0,0,0.08);
+  border-bottom:1px solid rgba(255,255,255,0.06);
 }
 .occ:last-child{border-bottom:none;}
-.occ-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-  gap:10px;
-  flex-wrap:wrap;
+
+.occ-banner{
+  background:linear-gradient(135deg, rgba(212,175,55,0.10), rgba(212,175,55,0.03));
+  border:1px solid rgba(212,175,55,0.28);
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:14px;
 }
 .occ-label{
-  font-size:13px;
+  font-size:12.5px;
   font-weight:700;
-  color:#7a5c12;
+  color:var(--gold-soft);
+  margin-bottom:10px;
 }
 
 .permit-tab{
@@ -295,13 +315,12 @@ header.top h1{
   justify-content:space-between;
   align-items:center;
   gap:10px;
-  padding:14px 18px;
-  border-radius:14px;
+  padding:13px 16px;
+  border-radius:12px;
   border:1.5px solid transparent;
-  margin-bottom:12px;
 }
 .permit-tab .pt-label{
-  font-size:12.5px;
+  font-size:12px;
   font-weight:700;
   opacity:.85;
 }
@@ -309,34 +328,40 @@ header.top h1{
   font-size:17px;
   font-weight:900;
 }
-.pb-ok{background:var(--ok-bg); color:#0d6b45; border-color:rgba(62,207,142,0.5);}
-.pb-soon{background:var(--soon-bg); color:#7a5c12; border-color:rgba(240,193,75,0.5);}
-.pb-bad{background:var(--bad-bg); color:#8a2c2c; border-color:rgba(239,106,106,0.5);}
+.pb-ok{background:var(--ok-bg); color:var(--ok); border-color:rgba(62,207,142,0.4);}
+.pb-soon{background:var(--soon-bg); color:var(--soon); border-color:rgba(240,193,75,0.4);}
+.pb-bad{background:var(--bad-bg); color:var(--bad); border-color:rgba(239,106,106,0.4);}
 .pb-ban{background:var(--ban); color:#fff; border-color:var(--ban);}
-.pb-unclear{background:var(--unclear-bg); color:#3d4443; border-color:rgba(168,181,178,0.5);}
+.pb-unclear{background:var(--unclear-bg); color:var(--unclear); border-color:rgba(168,181,178,0.4);}
 
 .fields{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
-  gap:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 .field{
-  background:#fff;
-  border:1px solid rgba(0,0,0,0.08);
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
   border-radius:12px;
-  padding:10px 12px;
+  padding:11px 14px;
   font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
 }
 .field .k{
-  color:#5c5c56;
-  font-size:11px;
-  display:block;
-  margin-bottom:4px;
+  color:var(--text-dim);
+  font-size:12px;
   font-weight:600;
+  white-space:nowrap;
+  flex-shrink:0;
 }
 .field .v{
   font-weight:600;
-  color:#000;
+  color:var(--text-main);
+  text-align:left;
+  flex:1;
 }
 
 .empty-state{
@@ -596,9 +621,9 @@ function searchIndividuals(query){
     const head = document.createElement("div");
     head.className = "person-head";
     head.innerHTML = `
-      <div>
-        <h2>${escapeHtml(g.name || "بدون اسم")}</h2>
-        <div class="sub">الرقم القومى: ${escapeHtml(g.nationalId || "غير مسجل")}</div>
+      <div class="identity-row">
+        <div class="id-tab id-tab-name"><span class="k">الاسم</span><span class="v">${escapeHtml(g.name || "بدون اسم")}</span></div>
+        <div class="id-tab id-tab-id"><span class="k">الرقم القومى</span><span class="v">${escapeHtml(g.nationalId || "غير مسجل")}</span></div>
       </div>
       <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
     `;
@@ -609,12 +634,12 @@ function searchIndividuals(query){
       const occ = document.createElement("div");
       occ.className = "occ";
       occ.innerHTML = `
-        <div class="occ-top">
-          <span class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</span>
-        </div>
-        <div class="permit-tab ${p.cls}">
-          <span class="pt-label">حالة التصريح</span>
-          <span class="pt-value">${escapeHtml(p.text)}</span>
+        <div class="occ-banner">
+          <div class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
+          <div class="permit-tab ${p.cls}">
+            <span class="pt-label">حالة التصريح</span>
+            <span class="pt-value">${escapeHtml(p.text)}</span>
+          </div>
         </div>
         <div class="fields">
           <div class="field"><span class="k">الوظيفة</span><span class="v">${escapeHtml(rec.job || "—")}</span></div>
@@ -699,9 +724,9 @@ function searchVehicles(query){
   const head = document.createElement("div");
   head.className = "person-head";
   head.innerHTML = `
-    <div>
-      <h2>${escapeHtml(g.plate)}</h2>
-      <div class="sub">${escapeHtml(sorted[0].type || "")} ${sorted[0].owner ? " · " + escapeHtml(sorted[0].owner) : ""}</div>
+    <div class="identity-row">
+      <div class="id-tab id-tab-name"><span class="k">رقم السيارة</span><span class="v">${escapeHtml(g.plate)}</span></div>
+      <div class="id-tab id-tab-id"><span class="k">النوع / تابعه</span><span class="v">${escapeHtml(sorted[0].type || "—")}${sorted[0].owner ? " · " + escapeHtml(sorted[0].owner) : ""}</span></div>
     </div>
     <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
   `;
@@ -712,12 +737,12 @@ function searchVehicles(query){
     const occ = document.createElement("div");
     occ.className = "occ";
     occ.innerHTML = `
-      <div class="occ-top">
-        <span class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</span>
-      </div>
-      <div class="permit-tab ${p.cls}">
-        <span class="pt-label">حالة التصريح</span>
-        <span class="pt-value">${escapeHtml(p.text)}</span>
+      <div class="occ-banner">
+        <div class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
+        <div class="permit-tab ${p.cls}">
+          <span class="pt-label">حالة التصريح</span>
+          <span class="pt-value">${escapeHtml(p.text)}</span>
+        </div>
       </div>
       <div class="fields">
         <div class="field"><span class="k">النوع</span><span class="v">${escapeHtml(rec.type || "—")}</span></div>
