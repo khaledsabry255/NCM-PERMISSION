@@ -317,22 +317,39 @@ header.top h1{
   padding:6px 12px;
   border-radius:100px;
   white-space:nowrap;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  cursor:default;
-  user-select:none;
 }
-.count-badge[role="button"]{
-  cursor:pointer;
-  transition:background .15s ease;
-}
-.count-badge[role="button"]:hover{ background:rgba(23,224,195,0.26); }
-.cb-chevron{ transition:transform .2s ease; }
-.person-card.expanded .cb-chevron{ transform:rotate(180deg); }
 
-.occ.occ-collapsed{ display:none; }
-.person-card.expanded .occ.occ-collapsed{ display:block; }
+.occ-selector{
+  display:flex;
+  gap:8px;
+  padding:14px 20px 0;
+  overflow-x:auto;
+}
+.occ-chip{
+  flex-shrink:0;
+  min-width:36px;
+  height:36px;
+  padding:0 12px;
+  border-radius:10px;
+  border:1px solid var(--glass-border);
+  background:rgba(255,255,255,0.04);
+  color:var(--text-dim);
+  font-family:inherit;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.occ-chip:hover{ border-color:rgba(23,224,195,0.4); color:var(--text-main); }
+.occ-chip.active{
+  background:linear-gradient(135deg, rgba(23,224,195,0.26), rgba(23,224,195,0.08));
+  border-color:var(--gold);
+  color:var(--gold-soft);
+}
+
+.occ-content{
+  padding:16px 20px;
+}
 
 .occ{
   padding:16px 20px;
@@ -469,7 +486,7 @@ footer{
   <section id="page-individuals">
     <div class="search-card">
       <div class="search-row">
-        <input id="ind-input" type="text" placeholder="اكتب الرقم القومى أو الاسم بالكامل ثم Enter">
+        <input id="ind-input" type="text" placeholder="">
         <button id="ind-btn">بحث</button>
       </div>
     </div>
@@ -481,7 +498,7 @@ footer{
   <section id="page-vehicles" style="display:none;">
     <div class="search-card">
       <div class="search-row">
-        <input id="veh-input" type="text" placeholder="اكتب رقم السيارة ثم Enter">
+        <input id="veh-input" type="text" placeholder="">
         <button id="veh-btn">بحث</button>
       </div>
     </div>
@@ -642,6 +659,50 @@ async function initIndividuals(){
   }
 }
 
+function renderOccurrenceSwitcher(card, sorted, fieldsHtmlFn){
+  const selector = document.createElement("div");
+  selector.className = "occ-selector";
+
+  const content = document.createElement("div");
+  content.className = "occ-content";
+
+  function renderContent(idx){
+    const rec = sorted[idx];
+    const p = classifyPermit(rec.permit);
+    content.innerHTML = `
+      <div class="occ-banner">
+        <div class="occ-label">${occurrenceLabel(idx)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
+        <div class="permit-tab ${p.cls}">
+          <span class="pt-label">حالة التصريح</span>
+          <span class="pt-value">${escapeHtml(p.text)}</span>
+        </div>
+      </div>
+      <div class="fields">${fieldsHtmlFn(rec)}</div>
+    `;
+  }
+
+  const defaultIdx = sorted.length - 1;
+
+  if(sorted.length > 1){
+    sorted.forEach((rec, i)=>{
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "occ-chip" + (i === defaultIdx ? " active" : "");
+      chip.textContent = i + 1;
+      chip.addEventListener("click", ()=>{
+        selector.querySelectorAll(".occ-chip").forEach(c=>c.classList.remove("active"));
+        chip.classList.add("active");
+        renderContent(i);
+      });
+      selector.appendChild(chip);
+    });
+    card.appendChild(selector);
+  }
+
+  renderContent(defaultIdx);
+  card.appendChild(content);
+}
+
 function searchIndividuals(query){
   const q = normalize(query);
   const resultsEl = document.getElementById("ind-results");
@@ -681,42 +742,16 @@ function searchIndividuals(query){
         <div class="id-tab id-tab-name"><span class="k">الاسم</span><span class="v">${escapeHtml(g.name || "بدون اسم")}</span></div>
         <div class="id-tab id-tab-id"><span class="k">الرقم القومى</span><span class="v">${escapeHtml(g.nationalId || "غير مسجل")}</span></div>
       </div>
-      <div class="count-badge" role="button" tabindex="0">
-        <span class="cb-text">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</span>
-        ${sorted.length > 1 ? '<svg class="cb-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' : ''}
-      </div>
+      <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
     `;
     card.appendChild(head);
 
-    sorted.forEach((rec, i)=>{
-      const isLatest = i === sorted.length - 1;
-      const p = classifyPermit(rec.permit);
-      const occ = document.createElement("div");
-      occ.className = "occ" + (isLatest ? "" : " occ-collapsed");
-      occ.innerHTML = `
-        <div class="occ-banner">
-          <div class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
-          <div class="permit-tab ${p.cls}">
-            <span class="pt-label">حالة التصريح</span>
-            <span class="pt-value">${escapeHtml(p.text)}</span>
-          </div>
-        </div>
-        <div class="fields">
-          <div class="field"><span class="k">الوظيفة</span><span class="v">${escapeHtml(rec.job || "—")}</span></div>
-          <div class="field"><span class="k">العنوان</span><span class="v">${escapeHtml(rec.address || "—")}</span></div>
-          <div class="field"><span class="k">المرسل</span><span class="v">${escapeHtml(rec.sender || "—")}</span></div>
-          <div class="field"><span class="k">ملاحظات</span><span class="v">${escapeHtml(rec.note || "—")}</span></div>
-        </div>
-      `;
-      card.appendChild(occ);
-    });
-
-    if(sorted.length > 1){
-      const badge = head.querySelector(".count-badge");
-      const toggle = ()=> card.classList.toggle("expanded");
-      badge.addEventListener("click", toggle);
-      badge.addEventListener("keydown", e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); toggle(); } });
-    }
+    renderOccurrenceSwitcher(card, sorted, rec => `
+      <div class="field"><span class="k">الوظيفة</span><span class="v">${escapeHtml(rec.job || "—")}</span></div>
+      <div class="field"><span class="k">العنوان</span><span class="v">${escapeHtml(rec.address || "—")}</span></div>
+      <div class="field"><span class="k">المرسل</span><span class="v">${escapeHtml(rec.sender || "—")}</span></div>
+      <div class="field"><span class="k">ملاحظات</span><span class="v">${escapeHtml(rec.note || "—")}</span></div>
+    `);
 
     resultsEl.appendChild(card);
   });
@@ -795,40 +830,14 @@ function searchVehicles(query){
       <div class="id-tab id-tab-name"><span class="k">رقم السيارة</span><span class="v">${escapeHtml(g.plate)}</span></div>
       <div class="id-tab id-tab-id"><span class="k">النوع / تابعه</span><span class="v">${escapeHtml(sorted[0].type || "—")}${sorted[0].owner ? " · " + escapeHtml(sorted[0].owner) : ""}</span></div>
     </div>
-    <div class="count-badge" role="button" tabindex="0">
-      <span class="cb-text">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</span>
-      ${sorted.length > 1 ? '<svg class="cb-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' : ''}
-    </div>
+    <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
   `;
   card.appendChild(head);
 
-  sorted.forEach((rec,i)=>{
-    const isLatest = i === sorted.length - 1;
-    const p = classifyPermit(rec.permit);
-    const occ = document.createElement("div");
-    occ.className = "occ" + (isLatest ? "" : " occ-collapsed");
-    occ.innerHTML = `
-      <div class="occ-banner">
-        <div class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
-        <div class="permit-tab ${p.cls}">
-          <span class="pt-label">حالة التصريح</span>
-          <span class="pt-value">${escapeHtml(p.text)}</span>
-        </div>
-      </div>
-      <div class="fields">
-        <div class="field"><span class="k">النوع</span><span class="v">${escapeHtml(rec.type || "—")}</span></div>
-        <div class="field"><span class="k">تابعه</span><span class="v">${escapeHtml(rec.owner || "—")}</span></div>
-      </div>
-    `;
-    card.appendChild(occ);
-  });
-
-  if(sorted.length > 1){
-    const badge = head.querySelector(".count-badge");
-    const toggle = ()=> card.classList.toggle("expanded");
-    badge.addEventListener("click", toggle);
-    badge.addEventListener("keydown", e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); toggle(); } });
-  }
+  renderOccurrenceSwitcher(card, sorted, rec => `
+    <div class="field"><span class="k">النوع</span><span class="v">${escapeHtml(rec.type || "—")}</span></div>
+    <div class="field"><span class="k">تابعه</span><span class="v">${escapeHtml(rec.owner || "—")}</span></div>
+  `);
 
   resultsEl.appendChild(card);
 }
