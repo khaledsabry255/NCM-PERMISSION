@@ -710,18 +710,39 @@ function searchIndividuals(query){
   if(!q) return;
 
   let matches = [];
+  let truncated = false;
   const qDigits = digitsOnly(q);
   if(qDigits.length >= 8){
     const byId = individualsGroups.get("ID:"+qDigits);
     if(byId) matches.push(byId);
   }
-  if(matches.length === 0 && window.__individualsByName.has(q)){
-    matches = window.__individualsByName.get(q);
+  if(matches.length === 0){
+    if(window.__individualsByName.has(q)){
+      matches = window.__individualsByName.get(q);
+    }else{
+      const found = [];
+      individualsGroups.forEach(g=>{
+        if(g.name && normalize(g.name).includes(q)) found.push(g);
+      });
+      if(found.length > 50){
+        truncated = true;
+        matches = found.slice(0, 50);
+      }else{
+        matches = found;
+      }
+    }
   }
 
   if(matches.length === 0){
     resultsEl.innerHTML = `<div class="empty-state">مفيش نتيجة مطابقة لـ <b>${escapeHtml(q)}</b>. تأكد إن الرقم القومى أو الاسم مكتوب زي ما هو بالظبط في الشيت.</div>`;
     return;
+  }
+
+  if(truncated){
+    const note = document.createElement("div");
+    note.className = "status-line";
+    note.textContent = "فيه نتايج كتير مطابقة، ظاهر أول 50 بس. اكتب جزء أطول من الاسم عشان تضيّق البحث.";
+    resultsEl.appendChild(note);
   }
 
   matches.forEach(g=>{
@@ -802,18 +823,7 @@ async function initVehicles(){
   }
 }
 
-function searchVehicles(query){
-  const q = normalize(query).replace(/\s+/g,"");
-  const resultsEl = document.getElementById("veh-results");
-  resultsEl.innerHTML = "";
-  if(!q) return;
-
-  const g = vehiclesGroups.get(q);
-  if(!g){
-    resultsEl.innerHTML = `<div class="empty-state">مفيش نتيجة مطابقة لرقم السيارة <b>${escapeHtml(query)}</b>.</div>`;
-    return;
-  }
-
+function renderVehicleCard(g, resultsEl){
   const sorted = [...g.records].sort((a,b)=>{
     if(a.dayParsed && b.dayParsed) return a.dayParsed - b.dayParsed;
     if(a.dayParsed) return -1;
@@ -840,6 +850,48 @@ function searchVehicles(query){
   `);
 
   resultsEl.appendChild(card);
+}
+
+function searchVehicles(query){
+  const qRaw = normalize(query).replace(/\s+/g,"");
+  const resultsEl = document.getElementById("veh-results");
+  resultsEl.innerHTML = "";
+  if(!qRaw) return;
+
+  const isDigitsOnly = /^[0-9٠-٩]+$/.test(qRaw);
+
+  if(!isDigitsOnly){
+    // has letters (with or without numbers) -> exact plate match, as written in the sheet
+    const g = vehiclesGroups.get(qRaw);
+    if(!g){
+      resultsEl.innerHTML = `<div class="empty-state">مفيش نتيجة مطابقة لرقم السيارة <b>${escapeHtml(query)}</b>. تأكد إنه مكتوب زي ما هو بالظبط في الشيت.</div>`;
+      return;
+    }
+    renderVehicleCard(g, resultsEl);
+    return;
+  }
+
+  // digits only -> show every vehicle whose plate contains this number anywhere
+  const found = [];
+  vehiclesGroups.forEach((g, key)=>{
+    if(key.includes(qRaw)) found.push(g);
+  });
+
+  if(found.length === 0){
+    resultsEl.innerHTML = `<div class="empty-state">مفيش أي سيارة رقمها فيه <b>${escapeHtml(query)}</b>.</div>`;
+    return;
+  }
+
+  let list = found;
+  if(found.length > 50){
+    const note = document.createElement("div");
+    note.className = "status-line";
+    note.textContent = "فيه نتايج كتير مطابقة، ظاهر أول 50 بس. اكتب رقم أطول عشان تضيّق البحث.";
+    resultsEl.appendChild(note);
+    list = found.slice(0, 50);
+  }
+
+  list.forEach(g => renderVehicleCard(g, resultsEl));
 }
 
 /* ======================= Utils ======================= */
