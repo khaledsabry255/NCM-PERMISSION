@@ -317,7 +317,22 @@ header.top h1{
   padding:6px 12px;
   border-radius:100px;
   white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  cursor:default;
+  user-select:none;
 }
+.count-badge[role="button"]{
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.count-badge[role="button"]:hover{ background:rgba(23,224,195,0.26); }
+.cb-chevron{ transition:transform .2s ease; }
+.person-card.expanded .cb-chevron{ transform:rotate(180deg); }
+
+.occ.occ-collapsed{ display:none; }
+.person-card.expanded .occ.occ-collapsed{ display:block; }
 
 .occ{
   padding:16px 20px;
@@ -666,14 +681,18 @@ function searchIndividuals(query){
         <div class="id-tab id-tab-name"><span class="k">الاسم</span><span class="v">${escapeHtml(g.name || "بدون اسم")}</span></div>
         <div class="id-tab id-tab-id"><span class="k">الرقم القومى</span><span class="v">${escapeHtml(g.nationalId || "غير مسجل")}</span></div>
       </div>
-      <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
+      <div class="count-badge" role="button" tabindex="0">
+        <span class="cb-text">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</span>
+        ${sorted.length > 1 ? '<svg class="cb-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' : ''}
+      </div>
     `;
     card.appendChild(head);
 
     sorted.forEach((rec, i)=>{
+      const isLatest = i === sorted.length - 1;
       const p = classifyPermit(rec.permit);
       const occ = document.createElement("div");
-      occ.className = "occ";
+      occ.className = "occ" + (isLatest ? "" : " occ-collapsed");
       occ.innerHTML = `
         <div class="occ-banner">
           <div class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
@@ -691,6 +710,13 @@ function searchIndividuals(query){
       `;
       card.appendChild(occ);
     });
+
+    if(sorted.length > 1){
+      const badge = head.querySelector(".count-badge");
+      const toggle = ()=> card.classList.toggle("expanded");
+      badge.addEventListener("click", toggle);
+      badge.addEventListener("keydown", e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); toggle(); } });
+    }
 
     resultsEl.appendChild(card);
   });
@@ -769,14 +795,18 @@ function searchVehicles(query){
       <div class="id-tab id-tab-name"><span class="k">رقم السيارة</span><span class="v">${escapeHtml(g.plate)}</span></div>
       <div class="id-tab id-tab-id"><span class="k">النوع / تابعه</span><span class="v">${escapeHtml(sorted[0].type || "—")}${sorted[0].owner ? " · " + escapeHtml(sorted[0].owner) : ""}</span></div>
     </div>
-    <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
+    <div class="count-badge" role="button" tabindex="0">
+      <span class="cb-text">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</span>
+      ${sorted.length > 1 ? '<svg class="cb-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' : ''}
+    </div>
   `;
   card.appendChild(head);
 
   sorted.forEach((rec,i)=>{
+    const isLatest = i === sorted.length - 1;
     const p = classifyPermit(rec.permit);
     const occ = document.createElement("div");
-    occ.className = "occ";
+    occ.className = "occ" + (isLatest ? "" : " occ-collapsed");
     occ.innerHTML = `
       <div class="occ-banner">
         <div class="occ-label">${occurrenceLabel(i)} — تم الإرسال: ${escapeHtml(rec.day || "غير محدد")}</div>
@@ -792,6 +822,13 @@ function searchVehicles(query){
     `;
     card.appendChild(occ);
   });
+
+  if(sorted.length > 1){
+    const badge = head.querySelector(".count-badge");
+    const toggle = ()=> card.classList.toggle("expanded");
+    badge.addEventListener("click", toggle);
+    badge.addEventListener("keydown", e=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); toggle(); } });
+  }
 
   resultsEl.appendChild(card);
 }
