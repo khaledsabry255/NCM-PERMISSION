@@ -474,7 +474,6 @@ footer{
     <div class="results" id="veh-results"></div>
   </section>
 
-  <footer>مصدر البيانات: Google Sheets &middot; يتحدّث تلقائيًا مع أي تعديل على الشيت</footer>
 </div>
 
 <script>
@@ -620,7 +619,7 @@ async function initIndividuals(){
       window.__individualsByName.get(nameKey).push(g);
     });
 
-    statusEl.textContent = `تم تحميل ${dataRows.length} صف — ${individualsGroups.size} شخص (بعد تجميع التكرارات).`;
+    statusEl.textContent = "";
   }catch(err){
     const detail = (err && (err.message || err.toString())) || "غير معروف";
     statusEl.textContent = `حصل خطأ في تحميل بيانات الأفراد (${detail}). لو بتجرب الملف من على جهازك مباشرة (file://) ده السبب الأشهر — لازم يتفتح من على سيرفر (GitHub Pages) عشان يقدر يجيب البيانات من جوجل.`;
@@ -734,7 +733,7 @@ async function initVehicles(){
       });
     });
 
-    statusEl.textContent = `تم تحميل ${dataRows.length} صف — ${vehiclesGroups.size} سيارة (بعد تجميع التكرارات).`;
+    statusEl.textContent = "";
   }catch(err){
     const detail = (err && (err.message || err.toString())) || "غير معروف";
     statusEl.textContent = `حصل خطأ في تحميل بيانات المركبات (${detail}). لو بتجرب الملف من على جهازك مباشرة (file://) ده السبب الأشهر — لازم يتفتح من على سيرفر (GitHub Pages) عشان يقدر يجيب البيانات من جوجل.`;
