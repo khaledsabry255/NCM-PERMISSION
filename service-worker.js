@@ -1,4 +1,4 @@
-const CACHE_NAME = "ncm-permits-cache-v1";
+const CACHE_NAME = "ncm-permits-cache-v2";
 const CORE_ASSETS = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -18,14 +18,20 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Network-first for the Google Sheets data so search results are always fresh;
-  // cache-first for the app shell so it still opens offline.
+  if (event.request.method !== "GET") return;
   const url = event.request.url;
-  if (url.includes("docs.google.com")) {
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
-    return;
-  }
+
+  // Network-first everywhere: always get the latest page/data when online,
+  // and only fall back to the cached copy if there's no connection at all.
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.ok && !url.includes("docs.google.com")) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
