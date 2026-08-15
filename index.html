@@ -711,7 +711,14 @@ body.unlocked #lock-screen{ display:none; }
 /* ======================= Lock Screen (UI access lock, client-side only) ======================= */
 (function(){
   const CORRECT_PIN = "1804";
+  const UNLOCK_FLAG_KEY = "ncm_device_unlocked"; // stores only a yes/no flag, never the PIN itself
   let entered = "";
+
+  // Already unlocked once on this device before -> skip the lock screen entirely.
+  if(localStorage.getItem(UNLOCK_FLAG_KEY) === "1"){
+    document.body.classList.add("unlocked");
+    return;
+  }
 
   const dotsWrap = document.getElementById("pin-dots");
   const dots = dotsWrap.querySelectorAll(".pin-dot");
@@ -739,6 +746,7 @@ body.unlocked #lock-screen{ display:none; }
   }
 
   function unlock(){
+    try{ localStorage.setItem(UNLOCK_FLAG_KEY, "1"); }catch(e){}
     document.body.classList.add("unlocked");
   }
 
