@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بحث التصاريح - NCM</title>
+<title>NCM Permission Search</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0f14">
+<meta name="theme-color" content="#0B1117">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,8 +23,8 @@
 ================================== */
 
 :root{
-  --bg-deep:#0a0f14;
-  --bg-mid:#0d1b1f;
+  --bg-deep:#0B1117;
+  --bg-mid:#0e1620;
   --glass:rgba(255,255,255,0.06);
   --glass-border:rgba(255,255,255,0.14);
   --gold:#17e0c3;
@@ -445,10 +445,208 @@ footer{
   .search-row{flex-direction:column;}
   .search-row button{padding:14px;}
 }
+/* ======================= Lock Screen ======================= */
+
+#app-root{ display:none; }
+body.unlocked #app-root{ display:block; }
+body.unlocked #lock-screen{ display:none; }
+
+#lock-screen{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
+  padding:24px;
+}
+.lock-ring-bg{
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:340px; height:340px;
+  border-radius:50%;
+  border:1px solid rgba(23,224,195,0.10);
+  pointer-events:none;
+}
+.lock-ring-bg::before{
+  content:"";
+  position:absolute; inset:34px;
+  border-radius:50%;
+  border:1px solid rgba(23,224,195,0.07);
+}
+
+.lock-card{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:340px;
+  text-align:center;
+}
+.lock-logo{
+  display:flex;
+  justify-content:center;
+  margin-bottom:14px;
+  filter:drop-shadow(0 6px 18px rgba(23,224,195,0.18));
+}
+.lock-card h1{
+  font-family:'Tajawal',sans-serif;
+  font-weight:900;
+  font-size:24px;
+  color:var(--text-main);
+  margin:0 0 6px;
+}
+.lock-kicker{
+  font-size:11px;
+  letter-spacing:4px;
+  color:var(--gold-soft);
+  font-weight:700;
+  margin-bottom:36px;
+}
+
+.pin-label{
+  font-size:13px;
+  color:var(--text-dim);
+  margin-bottom:16px;
+}
+.pin-dots{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-bottom:10px;
+}
+.pin-dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  border:1.5px solid rgba(23,224,195,0.4);
+  background:transparent;
+  transition:background .15s ease, transform .15s ease, border-color .15s ease;
+}
+.pin-dot.filled{
+  background:var(--gold);
+  border-color:var(--gold);
+  transform:scale(1.1);
+}
+.pin-dots.shake{
+  animation:pinShake .4s ease;
+}
+.pin-dots.shake .pin-dot{
+  border-color:var(--bad);
+}
+@keyframes pinShake{
+  10%,90% { transform:translateX(-1px); }
+  20%,80% { transform:translateX(2px); }
+  30%,50%,70% { transform:translateX(-5px); }
+  40%,60% { transform:translateX(5px); }
+}
+
+.pin-error{
+  height:16px;
+  font-size:12.5px;
+  color:var(--bad);
+  margin-bottom:14px;
+  opacity:0;
+  transition:opacity .15s ease;
+}
+.pin-error.show{ opacity:1; }
+
+.pin-hidden-input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+  width:1px;
+  height:1px;
+}
+
+.pin-pad{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+  max-width:280px;
+  margin:0 auto;
+}
+.pin-key{
+  aspect-ratio:1;
+  border-radius:16px;
+  border:1px solid var(--glass-border);
+  background:var(--glass);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  color:var(--text-main);
+  font-family:'Tajawal',sans-serif;
+  font-size:20px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .12s ease;
+}
+.pin-key:hover{ border-color:rgba(23,224,195,0.4); }
+.pin-key:active{ transform:scale(0.94); background:rgba(23,224,195,0.12); }
+.pin-key-action{ color:var(--gold-soft); }
+
+@media (max-width:380px){
+  .pin-pad{ max-width:240px; gap:10px; }
+  .lock-card h1{ font-size:21px; }
+}
 </style>
 </head>
 <body>
 
+<div id="lock-screen">
+  <div class="lock-ring-bg"></div>
+  <div class="lock-card">
+    <div class="lock-logo">
+      <svg width="72" height="72" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M20 20 L26 10 L74 10 L80 20 L80 44 Q80 68 50 90 Q20 68 20 44 Z"
+              fill="none" stroke="var(--gold)" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <g transform="translate(50 44)">
+          <circle r="15.5" fill="none" stroke="var(--gold)" stroke-width="3.8" stroke-dasharray="75 15" stroke-dashoffset="-5" transform="rotate(-90)"/>
+          <circle r="12.4" fill="none" stroke="var(--gold-dim)" stroke-width="2.4" stroke-dasharray="20 50" stroke-dashoffset="-45" transform="rotate(-90)"/>
+          <circle r="2.6" fill="var(--gold)"/>
+        </g>
+      </svg>
+    </div>
+    <h1>بحث التصاريح</h1>
+    <div class="lock-kicker">SECURE ACCESS</div>
+
+    <div class="pin-label">أدخل رمز الدخول</div>
+    <div class="pin-dots" id="pin-dots">
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+    </div>
+    <div class="pin-error" id="pin-error">رمز الدخول غير صحيح</div>
+
+    <input id="pin-hidden-input" type="tel" inputmode="numeric" autocomplete="off" maxlength="4" class="pin-hidden-input" aria-label="رمز الدخول">
+
+    <div class="pin-pad">
+      <button type="button" class="pin-key" data-digit="1">1</button>
+      <button type="button" class="pin-key" data-digit="2">2</button>
+      <button type="button" class="pin-key" data-digit="3">3</button>
+      <button type="button" class="pin-key" data-digit="4">4</button>
+      <button type="button" class="pin-key" data-digit="5">5</button>
+      <button type="button" class="pin-key" data-digit="6">6</button>
+      <button type="button" class="pin-key" data-digit="7">7</button>
+      <button type="button" class="pin-key" data-digit="8">8</button>
+      <button type="button" class="pin-key" data-digit="9">9</button>
+      <button type="button" class="pin-key pin-key-action" id="pin-backspace" aria-label="مسح">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-6 8 6 8h13a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1z"/><path d="M15 10l-4 4M11 10l4 4"/></svg>
+      </button>
+      <button type="button" class="pin-key" data-digit="0">0</button>
+      <button type="button" class="pin-key pin-key-action" id="pin-submit" aria-label="دخول">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div id="app-root">
 <div class="emblem"></div>
 
 <div class="wrap">
@@ -507,6 +705,96 @@ footer{
   </section>
 
 </div>
+</div>
+
+<script>
+/* ======================= Lock Screen (UI access lock, client-side only) ======================= */
+(function(){
+  const CORRECT_PIN = "1804";
+  let entered = "";
+
+  const dotsWrap = document.getElementById("pin-dots");
+  const dots = dotsWrap.querySelectorAll(".pin-dot");
+  const errorEl = document.getElementById("pin-error");
+  const hiddenInput = document.getElementById("pin-hidden-input");
+
+  function renderDots(){
+    dots.forEach((d,i)=> d.classList.toggle("filled", i < entered.length));
+  }
+
+  function clearError(){
+    errorEl.classList.remove("show");
+    dotsWrap.classList.remove("shake");
+  }
+
+  function showError(){
+    errorEl.classList.add("show");
+    dotsWrap.classList.add("shake");
+    setTimeout(()=>{
+      entered = "";
+      hiddenInput.value = "";
+      renderDots();
+      dotsWrap.classList.remove("shake");
+    }, 420);
+  }
+
+  function unlock(){
+    document.body.classList.add("unlocked");
+  }
+
+  function checkIfComplete(){
+    if(entered.length === 4){
+      if(entered === CORRECT_PIN){
+        clearError();
+        unlock();
+      }else{
+        showError();
+      }
+    }
+  }
+
+  function addDigit(d){
+    if(entered.length >= 4) return;
+    clearError();
+    entered += d;
+    hiddenInput.value = entered;
+    renderDots();
+    checkIfComplete();
+  }
+
+  function removeDigit(){
+    entered = entered.slice(0, -1);
+    hiddenInput.value = entered;
+    clearError();
+    renderDots();
+  }
+
+  document.querySelectorAll(".pin-key[data-digit]").forEach(btn=>{
+    btn.addEventListener("click", ()=> addDigit(btn.dataset.digit));
+  });
+  document.getElementById("pin-backspace").addEventListener("click", removeDigit);
+  document.getElementById("pin-submit").addEventListener("click", checkIfComplete);
+
+  hiddenInput.addEventListener("input", ()=>{
+    entered = hiddenInput.value.replace(/[^0-9]/g,"").slice(0,4);
+    hiddenInput.value = entered;
+    clearError();
+    renderDots();
+    checkIfComplete();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if(document.body.classList.contains("unlocked")) return;
+    if(e.key >= "0" && e.key <= "9") addDigit(e.key);
+    else if(e.key === "Backspace") removeDigit();
+    else if(e.key === "Enter") checkIfComplete();
+  });
+
+  // Tapping anywhere on the card focuses the hidden input so the device's own numeric keyboard can be used too.
+  document.querySelector(".lock-card").addEventListener("click", ()=> hiddenInput.focus());
+  hiddenInput.focus();
+})();
+</script>
 
 <script>
 /* ======================= CONFIG ======================= */
