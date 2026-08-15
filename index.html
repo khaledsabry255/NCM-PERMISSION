@@ -1190,8 +1190,7 @@ function renderVehicleCard(g, resultsEl){
       <div class="count-badge">${sorted.length} ${sorted.length===1 ? "تصريح" : "تصاريح"}</div>
     </div>
     <div class="record-identity">
-      <div class="record-name">${escapeHtml(g.plate)}</div>
-      <div class="record-subid subid-plain">${escapeHtml(sorted[0].type || "—")}${sorted[0].owner ? " · " + escapeHtml(sorted[0].owner) : ""}</div>
+      <div class="record-name" style="margin-bottom:0;">${escapeHtml(g.plate)}</div>
     </div>
   `;
   card.appendChild(head);
