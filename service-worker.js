@@ -1,5 +1,12 @@
-const CACHE_NAME = "ncm-permits-cache-v8";
-const CORE_ASSETS = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
+const CACHE_NAME = "ncm-permits-cache-v10";
+const CORE_ASSETS = [
+  "./index.html",
+  "./manifest.json",
+  "./papaparse.min.js",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -26,7 +33,9 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.ok && !url.includes("docs.google.com")) {
+        // Only cache same-origin, successful responses. Opaque cross-origin
+        // responses (fonts, sheet data) are left alone.
+        if (response && response.ok && response.type === "basic" && !url.includes("docs.google.com")) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
