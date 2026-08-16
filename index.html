@@ -61,41 +61,37 @@ body{
 
 /* ---- Compact header bar ---- */
 .app-header{
-  position:sticky;
-  top:0;
-  z-index:5;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:13px 16px;
+  text-align:center;
+  padding:20px 16px 16px;
   margin:0 -16px 18px;
   background:rgba(11,17,23,0.92);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(255,255,255,0.08);
 }
-.app-header .brand{
-  display:flex;
-  align-items:center;
-  gap:9px;
-}
-.app-header .brand svg{ width:26px; height:26px; flex-shrink:0; }
-.app-header .brand-text{
+.app-header .brand svg{ width:46px; height:46px; margin-bottom:8px; }
+.app-header .brand-name{
   font-family:'Tajawal',sans-serif;
   font-weight:800;
-  font-size:14.5px;
+  font-size:20px;
   color:var(--text-main);
-  letter-spacing:.2px;
-  white-space:nowrap;
+  line-height:1.2;
+}
+.app-header .brand-sub{
+  font-family:'Tajawal',sans-serif;
+  font-weight:700;
+  font-size:12.5px;
+  color:var(--gold-soft);
+  letter-spacing:2.5px;
+  margin-top:3px;
 }
 .system-status{
-  display:flex;
+  display:inline-flex;
   align-items:center;
   gap:6px;
-  font-size:11px;
+  font-size:10.5px;
   color:var(--text-dim);
   font-weight:600;
   white-space:nowrap;
+  margin-top:9px;
 }
 .status-dot{
   width:7px; height:7px;
@@ -520,13 +516,21 @@ body.unlocked #lock-screen{ display:none; }
 .pin-label{
   font-size:13px;
   color:var(--text-dim);
-  margin-bottom:16px;
+  margin-bottom:18px;
 }
+.pin-dots-box{
+  padding:18px 0;
+  border:1px solid rgba(23,224,195,0.25);
+  border-radius:14px;
+  background:rgba(255,255,255,0.03);
+  cursor:pointer;
+  transition:border-color .15s ease;
+}
+.pin-dots-box:focus-within{ border-color:var(--gold); }
 .pin-dots{
   display:flex;
   justify-content:center;
-  gap:16px;
-  margin-bottom:10px;
+  gap:14px;
 }
 .pin-dot{
   width:14px;
@@ -554,11 +558,18 @@ body.unlocked #lock-screen{ display:none; }
   40%,60% { transform:translateX(5px); }
 }
 
+.pin-tap-hint{
+  font-size:11px;
+  color:#5c6b68;
+  margin-top:12px;
+  transition:opacity .15s ease;
+}
+
 .pin-error{
   height:16px;
   font-size:12.5px;
   color:var(--bad);
-  margin-bottom:14px;
+  margin-top:8px;
   opacity:0;
   transition:opacity .15s ease;
 }
@@ -567,41 +578,13 @@ body.unlocked #lock-screen{ display:none; }
 .pin-hidden-input{
   position:absolute;
   opacity:0;
-  pointer-events:none;
   width:1px;
   height:1px;
+  border:none;
+  padding:0;
 }
-
-.pin-pad{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:12px;
-  max-width:280px;
-  margin:0 auto;
-}
-.pin-key{
-  aspect-ratio:1;
-  border-radius:16px;
-  border:1px solid var(--glass-border);
-  background:var(--glass);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  color:var(--text-main);
-  font-family:'Tajawal',sans-serif;
-  font-size:20px;
-  font-weight:700;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:all .12s ease;
-}
-.pin-key:hover{ border-color:rgba(23,224,195,0.4); }
-.pin-key:active{ transform:scale(0.94); background:rgba(23,224,195,0.12); }
-.pin-key-action{ color:var(--gold-soft); }
 
 @media (max-width:380px){
-  .pin-pad{ max-width:240px; gap:10px; }
   .lock-card h1{ font-size:21px; }
 }
 </style>
@@ -626,34 +609,18 @@ body.unlocked #lock-screen{ display:none; }
     <div class="lock-kicker">SECURE ACCESS</div>
 
     <div class="pin-label">أدخل رمز الدخول</div>
-    <div class="pin-dots" id="pin-dots">
-      <span class="pin-dot"></span>
-      <span class="pin-dot"></span>
-      <span class="pin-dot"></span>
-      <span class="pin-dot"></span>
+    <div class="pin-dots-box" id="pin-dots-box">
+      <div class="pin-dots" id="pin-dots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
     </div>
+    <div class="pin-tap-hint" id="pin-tap-hint">اضغط هنا لفتح لوحة المفاتيح</div>
     <div class="pin-error" id="pin-error">رمز الدخول غير صحيح</div>
 
     <input id="pin-hidden-input" type="tel" inputmode="numeric" autocomplete="off" maxlength="4" class="pin-hidden-input" aria-label="رمز الدخول">
-
-    <div class="pin-pad">
-      <button type="button" class="pin-key" data-digit="1">1</button>
-      <button type="button" class="pin-key" data-digit="2">2</button>
-      <button type="button" class="pin-key" data-digit="3">3</button>
-      <button type="button" class="pin-key" data-digit="4">4</button>
-      <button type="button" class="pin-key" data-digit="5">5</button>
-      <button type="button" class="pin-key" data-digit="6">6</button>
-      <button type="button" class="pin-key" data-digit="7">7</button>
-      <button type="button" class="pin-key" data-digit="8">8</button>
-      <button type="button" class="pin-key" data-digit="9">9</button>
-      <button type="button" class="pin-key pin-key-action" id="pin-backspace" aria-label="مسح">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-6 8 6 8h13a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1z"/><path d="M15 10l-4 4M11 10l4 4"/></svg>
-      </button>
-      <button type="button" class="pin-key" data-digit="0">0</button>
-      <button type="button" class="pin-key pin-key-action" id="pin-submit" aria-label="دخول">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-      </button>
-    </div>
   </div>
 </div>
 
@@ -670,7 +637,8 @@ body.unlocked #lock-screen{ display:none; }
           <circle r="2.6" fill="var(--gold)"/>
         </g>
       </svg>
-      <span class="brand-text">NCM Permission Search</span>
+      <div class="brand-name">NCM</div>
+      <div class="brand-sub">PERMISSION SEARCH</div>
     </div>
     <div class="system-status">
       <span class="status-dot updating" id="system-status-dot"></span>
@@ -747,6 +715,8 @@ body.unlocked #lock-screen{ display:none; }
   const dots = dotsWrap.querySelectorAll(".pin-dot");
   const errorEl = document.getElementById("pin-error");
   const hiddenInput = document.getElementById("pin-hidden-input");
+  const dotsBox = document.getElementById("pin-dots-box");
+  const tapHint = document.getElementById("pin-tap-hint");
 
   function renderDots(){
     dots.forEach((d,i)=> d.classList.toggle("filled", i < entered.length));
@@ -770,6 +740,7 @@ body.unlocked #lock-screen{ display:none; }
 
   function unlock(){
     try{ localStorage.setItem(UNLOCK_FLAG_KEY, "1"); }catch(e){}
+    hiddenInput.blur();
     document.body.classList.add("unlocked");
   }
 
@@ -784,28 +755,7 @@ body.unlocked #lock-screen{ display:none; }
     }
   }
 
-  function addDigit(d){
-    if(entered.length >= 4) return;
-    clearError();
-    entered += d;
-    hiddenInput.value = entered;
-    renderDots();
-    checkIfComplete();
-  }
-
-  function removeDigit(){
-    entered = entered.slice(0, -1);
-    hiddenInput.value = entered;
-    clearError();
-    renderDots();
-  }
-
-  document.querySelectorAll(".pin-key[data-digit]").forEach(btn=>{
-    btn.addEventListener("click", ()=> addDigit(btn.dataset.digit));
-  });
-  document.getElementById("pin-backspace").addEventListener("click", removeDigit);
-  document.getElementById("pin-submit").addEventListener("click", checkIfComplete);
-
+  // Single source of input: the device's own keyboard, via the hidden field.
   hiddenInput.addEventListener("input", ()=>{
     entered = hiddenInput.value.replace(/[^0-9]/g,"").slice(0,4);
     hiddenInput.value = entered;
@@ -814,16 +764,22 @@ body.unlocked #lock-screen{ display:none; }
     checkIfComplete();
   });
 
-  document.addEventListener("keydown", (e)=>{
-    if(document.body.classList.contains("unlocked")) return;
-    if(e.key >= "0" && e.key <= "9") addDigit(e.key);
-    else if(e.key === "Backspace") removeDigit();
-    else if(e.key === "Enter") checkIfComplete();
+  hiddenInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      e.preventDefault();
+      checkIfComplete();
+    }
   });
 
-  // Tapping anywhere on the card focuses the hidden input so the device's own numeric keyboard can be used too.
-  document.querySelector(".lock-card").addEventListener("click", ()=> hiddenInput.focus());
-  hiddenInput.focus();
+  function focusInput(){ hiddenInput.focus(); }
+  dotsBox.addEventListener("click", focusInput);
+  tapHint.addEventListener("click", focusInput);
+  document.querySelector(".lock-card").addEventListener("click", focusInput);
+
+  hiddenInput.addEventListener("focus", ()=>{ tapHint.style.opacity = "0"; });
+  hiddenInput.addEventListener("blur", ()=>{ tapHint.style.opacity = "1"; });
+
+  focusInput();
 })();
 </script>
 
