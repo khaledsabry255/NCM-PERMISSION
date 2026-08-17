@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>NCM Permission Search</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0B1117">
+<meta name="theme-color" content="#0D1210">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -15,29 +15,31 @@
 <meta name="referrer" content="no-referrer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <script src="papaparse.min.js"></script>
 <style>
 
 :root{
-  --bg-deep:#0B1117;
-  --bg-mid:#0e1620;
+  --bg-deep:#0D1210;
+  --bg-mid:#121815;
   --glass:rgba(255,255,255,0.06);
   --glass-border:rgba(255,255,255,0.14);
-  --gold:#17e0c3;
-  --gold-soft:#5ef2dc;
-  --gold-dim:#0c8a78;
-  --text-main:#f4f1e9;
-  --text-dim:#9fb3ae;
+  --gold:#C9A961;
+  --gold-soft:#E0C489;
+  --gold-dim:#8A7340;
+  --on-gold:#0D1210;
+  --brand-green:#4CAF50;
+  --text-main:#F2EFE6;
+  --text-dim:#9AA39B;
   --ok:#3ecf8e;
   --ok-bg:rgba(62,207,142,0.14);
-  --soon:#f0c14b;
-  --soon-bg:rgba(240,193,75,0.16);
+  --soon:#E89B3C;
+  --soon-bg:rgba(232,155,60,0.15);
   --bad:#ef6a6a;
-  --bad-bg:rgba(239,106,106,0.16);
+  --bad-bg:rgba(239,106,106,0.15);
   --ban:#ff3b3b;
-  --unclear:#a8b5b2;
-  --unclear-bg:rgba(168,181,178,0.14);
+  --unclear:#A8B0A8;
+  --unclear-bg:rgba(168,176,168,0.14);
 }
 
 *{box-sizing:border-box;}
@@ -50,7 +52,6 @@ body{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Ambient depth behind everything — fixed so it never scrolls away. */
 body::before{
   content:"";
   position:fixed;
@@ -58,8 +59,8 @@ body::before{
   z-index:0;
   pointer-events:none;
   background:
-    radial-gradient(circle at 50% -10%, rgba(23,224,195,0.10), transparent 55%),
-    radial-gradient(circle at 15% 105%, rgba(23,224,195,0.05), transparent 45%),
+    radial-gradient(circle at 50% -10%, rgba(201,169,97,0.09), transparent 55%),
+    radial-gradient(circle at 15% 105%, rgba(76,175,80,0.05), transparent 45%),
     linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
 }
 
@@ -70,32 +71,78 @@ body::before{
   padding:0 16px calc(60px + env(safe-area-inset-bottom));
 }
 
-/* ---- Compact header bar ---- */
-.app-header{
-  position:relative;
-  text-align:center;
-  padding:calc(18px + env(safe-area-inset-top)) 16px 16px;
-  margin:0 -16px 18px;
-  background:rgba(11,17,23,0.92);
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  backdrop-filter:blur(10px);
+/* ---- NCM wordmark (text, not an image: stays sharp at any size) ---- */
+.logo-mark{ text-align:center; line-height:1; }
+.logo-ncm{
+  font-family:'Montserrat',sans-serif;
+  font-weight:900;
+  letter-spacing:1px;
+  color:#ffffff;
 }
-.app-header .brand svg{ width:46px; height:46px; margin-bottom:8px; }
-.app-header .brand-name{
-  font-family:'Tajawal',sans-serif;
-  font-weight:800;
-  font-size:20px;
-  color:var(--text-main);
-  line-height:1.2;
-}
-.app-header .brand-sub{
-  font-family:'Tajawal',sans-serif;
+.logo-ncm .c{ color:var(--brand-green); }
+.logo-sub{
+  font-family:'Montserrat',sans-serif;
   font-weight:700;
-  font-size:12.5px;
-  color:var(--gold-soft);
-  letter-spacing:2.5px;
-  margin-top:3px;
+  color:var(--gold);
+  white-space:nowrap;
 }
+.logo-xl .logo-ncm{ font-size:52px; }
+.logo-xl .logo-sub{ font-size:12px; letter-spacing:4.8px; margin-top:11px; }
+.logo-lg .logo-ncm{ font-size:40px; }
+.logo-lg .logo-sub{ font-size:9.4px; letter-spacing:3.8px; margin-top:9px; }
+.logo-sm .logo-ncm{ font-size:21px; }
+.logo-sm .logo-sub{ font-size:5.8px; letter-spacing:2.1px; margin-top:4px; }
+
+/* ---- Language switch: pinned to the screen, never to the header, so it
+        cannot shift when the header collapses or the direction flips ---- */
+.lang-switch{
+  position:fixed;
+  top:calc(14px + env(safe-area-inset-top));
+  right:12px;
+  z-index:2000;
+  display:flex;
+  gap:2px;
+  padding:3px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:100px;
+  backdrop-filter:blur(8px);
+}
+.lang-opt{
+  border:none;
+  background:transparent;
+  color:var(--text-dim);
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:800;
+  letter-spacing:.3px;
+  padding:5px 11px;
+  border-radius:100px;
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease;
+  min-width:34px;
+}
+.lang-opt:hover{ color:var(--text-main); }
+.lang-opt.active{
+  background:var(--gold);
+  color:var(--on-gold);
+  box-shadow:0 2px 8px rgba(201,169,97,0.28);
+}
+
+/* ---- Header ---- */
+.app-header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  text-align:center;
+  padding:calc(20px + env(safe-area-inset-top)) 16px 14px;
+  margin:0 -16px 18px;
+  background:rgba(13,18,16,0.96);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  backdrop-filter:blur(10px);
+  transition:padding .34s cubic-bezier(.4,0,.2,1);
+}
+.header-compact{ display:none; }
 .system-status{
   display:inline-flex;
   align-items:center;
@@ -104,7 +151,7 @@ body::before{
   color:var(--text-dim);
   font-weight:600;
   white-space:nowrap;
-  margin-top:9px;
+  margin-top:11px;
 }
 .status-dot{
   width:7px; height:7px;
@@ -125,39 +172,21 @@ body::before{
   0%{opacity:1;} 50%{opacity:.35;} 100%{opacity:1;}
 }
 
-/* ---- Language switch ---- */
-.lang-switch{
-  position:absolute;
-  top:calc(16px + env(safe-area-inset-top));
-  inset-inline-end:14px;
-  display:flex;
-  gap:2px;
-  padding:3px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:100px;
-  z-index:2;
+/* ---- Search mode: collapse everything that isn't a result ---- */
+body.search-mode .app-header{
+  padding:calc(8px + env(safe-area-inset-top)) 16px 8px;
+  margin-bottom:10px;
 }
-.lang-opt{
-  border:none;
+body.search-mode .header-full{ display:none; }
+body.search-mode .header-compact{ display:block; }
+body.search-mode .system-status{ display:none; }
+body.search-mode .tabs{ margin-bottom:10px; }
+body.search-mode .search-card{
+  padding:0;
   background:transparent;
-  color:var(--text-dim);
-  font-family:inherit;
-  font-size:11.5px;
-  font-weight:800;
-  letter-spacing:.3px;
-  padding:5px 11px;
-  border-radius:100px;
-  cursor:pointer;
-  transition:background .15s ease, color .15s ease;
-  min-width:34px;
+  border-color:transparent;
 }
-.lang-opt:hover{ color:var(--text-main); }
-.lang-opt.active{
-  background:var(--gold);
-  color:#06120f;
-  box-shadow:0 2px 8px rgba(23,224,195,0.25);
-}
+body.search-mode .search-row button.search-btn{ display:none; }
 
 /* ---- Tabs (segmented control) ---- */
 .tabs{
@@ -168,6 +197,7 @@ body::before{
   border-radius:12px;
   padding:4px;
   margin-bottom:16px;
+  transition:margin .34s cubic-bezier(.4,0,.2,1);
 }
 .tab-btn{
   flex:1;
@@ -189,8 +219,8 @@ body::before{
 .tab-btn:hover{ color:var(--text-main); }
 .tab-btn.active{
   background:var(--gold);
-  color:#06120f;
-  box-shadow:0 4px 14px rgba(23,224,195,0.22);
+  color:var(--on-gold);
+  box-shadow:0 4px 14px rgba(201,169,97,0.22);
 }
 
 /* ---- Search area ---- */
@@ -199,6 +229,7 @@ body::before{
   border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;
   padding:14px;
+  transition:padding .34s cubic-bezier(.4,0,.2,1), background .34s ease, border-color .34s ease;
 }
 .search-row{
   display:flex;
@@ -222,7 +253,7 @@ body::before{
   padding-inline-end:40px;
   border-radius:10px;
   border:1px solid var(--glass-border);
-  background:rgba(0,0,0,0.22);
+  background:rgba(0,0,0,0.28);
   color:var(--text-main);
   font-family:inherit;
   font-size:15.5px;
@@ -230,7 +261,7 @@ body::before{
   transition:border-color .15s ease, box-shadow .15s ease;
 }
 .search-row input::placeholder{color:var(--text-dim);}
-.search-row input:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(23,224,195,0.12);}
+.search-row input:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,169,97,0.14);}
 .clear-btn{
   position:absolute;
   top:50%; inset-inline-end:10px;
@@ -253,7 +284,7 @@ body::before{
   border-radius:10px;
   border:none;
   background:var(--gold);
-  color:#06120f;
+  color:var(--on-gold);
   font-family:inherit;
   font-weight:800;
   font-size:14.5px;
@@ -278,7 +309,7 @@ body::before{
 .spinner{
   width:13px; height:13px;
   border-radius:50%;
-  border:2px solid rgba(23,224,195,0.25);
+  border:2px solid rgba(201,169,97,0.25);
   border-top-color:var(--gold);
   animation:spin .7s linear infinite;
   flex-shrink:0;
@@ -296,7 +327,7 @@ body::before{
 .search-hint svg, .empty-state svg, .error-state svg{
   display:block;
   margin:0 auto 12px;
-  color:rgba(159,179,174,0.5);
+  color:rgba(154,163,155,0.5);
 }
 .empty-state b{color:var(--text-main);}
 .error-state{ color:var(--bad); }
@@ -308,8 +339,9 @@ body::before{
   flex-direction:column;
   gap:14px;
 }
+body.search-mode .results{ margin-top:12px; }
 
-/* ---- Personnel Record card ---- */
+/* ---- Record card ---- */
 .person-card{
   background:rgba(255,255,255,0.03);
   border:1px solid rgba(255,255,255,0.09);
@@ -351,18 +383,10 @@ body::before{
   font-size:15.5px;
   letter-spacing:.5px;
   color:var(--gold-soft);
-  background:rgba(23,224,195,0.06);
-  border:1px solid rgba(23,224,195,0.22);
+  background:rgba(201,169,97,0.07);
+  border:1px solid rgba(201,169,97,0.26);
   border-radius:12px;
   padding:11px 10px;
-}
-.record-subid.subid-plain{
-  color:var(--text-dim);
-  background:rgba(255,255,255,0.04);
-  border-color:rgba(255,255,255,0.1);
-  font-size:13px;
-  font-weight:600;
-  letter-spacing:0;
 }
 .count-badge{
   background:rgba(255,255,255,0.05);
@@ -396,16 +420,15 @@ body::before{
   cursor:pointer;
   transition:all .15s ease;
 }
-.occ-chip:hover{ border-color:rgba(23,224,195,0.35); color:var(--text-main); }
+.occ-chip:hover{ border-color:rgba(201,169,97,0.35); color:var(--text-main); }
 .occ-chip.active{
-  background:rgba(23,224,195,0.14);
+  background:rgba(201,169,97,0.16);
   border-color:var(--gold);
   color:var(--gold-soft);
 }
 
 .occ-content{ padding:14px 18px 18px; }
 
-/* Record rows: clean divided list, not boxes */
 .record-rows{
   display:flex;
   flex-direction:column;
@@ -437,7 +460,7 @@ body::before{
   flex:1;
 }
 
-/* Permit status: distinctive banner (icon + label on one side, value on the other) */
+/* Permit status banner */
 .permit-banner{
   display:flex;
   align-items:center;
@@ -470,16 +493,16 @@ body::before{
   font-weight:800;
   text-align:end;
 }
-.pb-ok{ background:var(--ok-bg); border-color:rgba(62,207,142,0.4); box-shadow:0 4px 16px rgba(62,207,142,0.1); color:var(--ok); }
+.pb-ok{ background:var(--ok-bg); border-color:rgba(62,207,142,0.42); box-shadow:0 4px 16px rgba(62,207,142,0.1); color:var(--ok); }
 .pb-ok .permit-icon{ background:rgba(62,207,142,0.2); }
-.pb-soon{ background:var(--soon-bg); border-color:rgba(240,193,75,0.4); box-shadow:0 4px 16px rgba(240,193,75,0.1); color:var(--soon); }
-.pb-soon .permit-icon{ background:rgba(240,193,75,0.2); }
-.pb-bad{ background:var(--bad-bg); border-color:rgba(239,106,106,0.4); box-shadow:0 4px 16px rgba(239,106,106,0.1); color:var(--bad); }
+.pb-soon{ background:var(--soon-bg); border-color:rgba(232,155,60,0.42); box-shadow:0 4px 16px rgba(232,155,60,0.1); color:var(--soon); }
+.pb-soon .permit-icon{ background:rgba(232,155,60,0.2); }
+.pb-bad{ background:var(--bad-bg); border-color:rgba(239,106,106,0.42); box-shadow:0 4px 16px rgba(239,106,106,0.1); color:var(--bad); }
 .pb-bad .permit-icon{ background:rgba(239,106,106,0.2); }
 .pb-ban{ background:var(--ban); border-color:var(--ban); box-shadow:0 4px 16px rgba(255,59,59,0.2); color:#fff; }
 .pb-ban .permit-icon{ background:rgba(255,255,255,0.22); }
-.pb-unclear{ background:var(--unclear-bg); border-color:rgba(168,181,178,0.4); box-shadow:0 4px 16px rgba(168,181,178,0.08); color:var(--unclear); }
-.pb-unclear .permit-icon{ background:rgba(168,181,178,0.2); }
+.pb-unclear{ background:var(--unclear-bg); border-color:rgba(168,176,168,0.42); box-shadow:0 4px 16px rgba(168,176,168,0.08); color:var(--unclear); }
+.pb-unclear .permit-icon{ background:rgba(168,176,168,0.2); }
 
 .occ-date-box{
   text-align:center;
@@ -508,6 +531,7 @@ footer{
   opacity:.55;
   line-height:1.8;
 }
+body.search-mode footer{ display:none; }
 
 @media (max-width:480px){
   .search-row{ flex-direction:column; }
@@ -528,27 +552,8 @@ body.unlocked #lock-screen{ display:none; }
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
+  background:linear-gradient(165deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
   padding:24px;
-}
-#lock-screen .lang-switch{
-  top:calc(20px + env(safe-area-inset-top));
-  inset-inline-end:20px;
-}
-.lock-ring-bg{
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:340px; height:340px;
-  border-radius:50%;
-  border:1px solid rgba(23,224,195,0.10);
-  pointer-events:none;
-}
-.lock-ring-bg::before{
-  content:"";
-  position:absolute; inset:34px;
-  border-radius:50%;
-  border:1px solid rgba(23,224,195,0.07);
 }
 
 .lock-card{
@@ -558,35 +563,16 @@ body.unlocked #lock-screen{ display:none; }
   max-width:340px;
   text-align:center;
 }
-.lock-logo{
-  display:flex;
-  justify-content:center;
-  margin-bottom:14px;
-  filter:drop-shadow(0 6px 18px rgba(23,224,195,0.18));
-}
-.lock-card h1{
-  font-family:'Tajawal',sans-serif;
-  font-weight:900;
-  font-size:24px;
-  color:var(--text-main);
-  margin:0 0 6px;
-}
-.lock-kicker{
-  font-size:11px;
-  letter-spacing:4px;
-  color:var(--gold-soft);
-  font-weight:700;
-  margin-bottom:36px;
-}
+.lock-logo{ margin-bottom:40px; }
 
 .pin-label{
   font-size:13px;
   color:var(--text-dim);
-  margin-bottom:18px;
+  margin-bottom:16px;
 }
 .pin-dots-box{
   padding:18px 0;
-  border:1px solid rgba(23,224,195,0.25);
+  border:1px solid rgba(201,169,97,0.3);
   border-radius:14px;
   background:rgba(255,255,255,0.03);
   cursor:pointer;
@@ -602,7 +588,7 @@ body.unlocked #lock-screen{ display:none; }
   width:14px;
   height:14px;
   border-radius:50%;
-  border:1.5px solid rgba(23,224,195,0.4);
+  border:1.5px solid rgba(201,169,97,0.45);
   background:transparent;
   transition:background .15s ease, transform .15s ease, border-color .15s ease;
 }
@@ -626,7 +612,7 @@ body.unlocked #lock-screen{ display:none; }
 
 .pin-tap-hint{
   font-size:11px;
-  color:#5c6b68;
+  color:#5f6b5f;
   margin-top:12px;
   transition:opacity .15s ease;
 }
@@ -651,34 +637,29 @@ body.unlocked #lock-screen{ display:none; }
 }
 
 @media (max-width:380px){
-  .lock-card h1{ font-size:21px; }
+  .logo-xl .logo-ncm{ font-size:44px; }
+  .logo-xl .logo-sub{ font-size:10.4px; letter-spacing:4px; }
 }
 </style>
 </head>
 <body>
 
+<!-- Pinned to the viewport so it never moves: not inside the header, not inside
+     the lock screen, and positioned with physical `right` so flipping the
+     text direction leaves it exactly where it was. -->
+<div class="lang-switch" role="group" aria-label="Language">
+  <button type="button" class="lang-opt" data-lang="ar">ع</button>
+  <button type="button" class="lang-opt" data-lang="en">EN</button>
+</div>
+
 <div id="lock-screen">
-  <div class="lock-ring-bg"></div>
-
-  <div class="lang-switch" role="group" aria-label="Language">
-    <button type="button" class="lang-opt" data-lang="ar">ع</button>
-    <button type="button" class="lang-opt" data-lang="en">EN</button>
-  </div>
-
   <div class="lock-card">
     <div class="lock-logo">
-      <svg width="72" height="72" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M20 20 L26 10 L74 10 L80 20 L80 44 Q80 68 50 90 Q20 68 20 44 Z"
-              fill="none" stroke="var(--gold)" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
-        <g transform="translate(50 44)">
-          <circle r="15.5" fill="none" stroke="var(--gold)" stroke-width="3.8" stroke-dasharray="75 15" stroke-dashoffset="-5" transform="rotate(-90)"/>
-          <circle r="12.4" fill="none" stroke="var(--gold-dim)" stroke-width="2.4" stroke-dasharray="20 50" stroke-dashoffset="-45" transform="rotate(-90)"/>
-          <circle r="2.6" fill="var(--gold)"/>
-        </g>
-      </svg>
+      <div class="logo-mark logo-xl">
+        <div class="logo-ncm">N<span class="c">C</span>M</div>
+        <div class="logo-sub">NUCLEAR CONCRETE MIXES</div>
+      </div>
     </div>
-    <h1 data-i18n="appTitle">بحث التصاريح</h1>
-    <div class="lock-kicker" data-i18n="secureAccess">SECURE ACCESS</div>
 
     <div class="pin-label" data-i18n="pinLabel">أدخل رمز الدخول</div>
     <div class="pin-dots-box" id="pin-dots-box">
@@ -700,22 +681,17 @@ body.unlocked #lock-screen{ display:none; }
 <div id="app-root">
 <div class="wrap">
   <div class="app-header">
-    <div class="lang-switch" role="group" aria-label="Language">
-      <button type="button" class="lang-opt" data-lang="ar">ع</button>
-      <button type="button" class="lang-opt" data-lang="en">EN</button>
+    <div class="header-full">
+      <div class="logo-mark logo-lg">
+        <div class="logo-ncm">N<span class="c">C</span>M</div>
+        <div class="logo-sub">NUCLEAR CONCRETE MIXES</div>
+      </div>
     </div>
-
-    <div class="brand">
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M20 20 L26 10 L74 10 L80 20 L80 44 Q80 68 50 90 Q20 68 20 44 Z"
-              fill="none" stroke="var(--gold)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-        <g transform="translate(50 44)">
-          <circle r="15.5" fill="none" stroke="var(--gold)" stroke-width="5.5" stroke-dasharray="75 15" stroke-dashoffset="-5" transform="rotate(-90)"/>
-          <circle r="2.6" fill="var(--gold)"/>
-        </g>
-      </svg>
-      <div class="brand-name">NCM</div>
-      <div class="brand-sub" data-i18n="brandSub">PERMISSION SEARCH</div>
+    <div class="header-compact">
+      <div class="logo-mark logo-sm">
+        <div class="logo-ncm">N<span class="c">C</span>M</div>
+        <div class="logo-sub">NUCLEAR CONCRETE MIXES</div>
+      </div>
     </div>
     <div class="system-status">
       <span class="status-dot updating" id="system-status-dot"></span>
@@ -780,7 +756,7 @@ body.unlocked #lock-screen{ display:none; }
 
   <footer>
     <div>NCM &middot; <span data-i18n="appTitle">بحث التصاريح</span></div>
-    <div>v2.0</div>
+    <div>v3.0</div>
   </footer>
 
 </div>
@@ -793,11 +769,9 @@ const LANG_KEY = "ncm_lang";
 const I18N = {
   ar: {
     appTitle:"بحث التصاريح",
-    secureAccess:"SECURE ACCESS",
     pinLabel:"أدخل رمز الدخول",
     pinHint:"اضغط هنا لفتح لوحة المفاتيح",
     pinError:"رمز الدخول غير صحيح",
-    brandSub:"PERMISSION SEARCH",
     statusUpdating:"جاري التحديث",
     statusOnline:"متصل",
     statusError:"خطأ في الاتصال",
@@ -834,11 +808,9 @@ const I18N = {
   },
   en: {
     appTitle:"Permit Search",
-    secureAccess:"SECURE ACCESS",
     pinLabel:"Enter access code",
     pinHint:"Tap here to open the keyboard",
     pinError:"Incorrect access code",
-    brandSub:"PERMISSION SEARCH",
     statusUpdating:"Updating",
     statusOnline:"Connected",
     statusError:"Connection error",
@@ -887,8 +859,6 @@ function t(key, arg){
   return entry !== undefined ? entry : key;
 }
 
-/* Permit values come from the sheet in Arabic. In English mode we map the known
-   phrases; anything unrecognised (dates, free text) is shown exactly as written. */
 const PERMIT_PHRASE_EN = [
   ["الرخصه منتهيه","License expired"],
   ["الرخصة منتهية","License expired"],
@@ -1013,7 +983,6 @@ applyStaticI18n();
   function focusInput(){ hiddenInput.focus(); }
   dotsBox.addEventListener("click", focusInput);
   tapHint.addEventListener("click", focusInput);
-  // The language buttons sit inside the lock screen, so don't steal focus from them.
   document.querySelector(".lock-card").addEventListener("click", focusInput);
 
   hiddenInput.addEventListener("focus", ()=>{ tapHint.style.opacity = "0"; });
@@ -1044,34 +1013,50 @@ const RENEW_WORDS = ["عايز تجديد","الرخصه منتهيه","غيرت
 const TEMP_WORDS = ["مؤقت"];
 const QUESTION_MARKS_ONLY = /^[؟?]+$/;
 
+/* The sheet hands us two different date shapes:
+     - "18-11-2025"  text cells typed by hand      -> day first
+     - "11/30/2025"  real date cells, which gviz exports in US order -> month first
+   Reading a slash date as day-first turns 11/30/2025 into month 30, which JS
+   rolls forward into 2028 and paints an expired permit green. Pick the order
+   from the separator, and fall back to day-first when the numbers rule out
+   month-first. */
 function parseDateLoose(v){
   if(!v) return null;
   const s = normalize(v);
-  const m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  const m = s.match(/^(\d{1,2})([-\/])(\d{1,2})[-\/](\d{4})/);
   if(!m) return null;
-  const day = parseInt(m[1],10), month = parseInt(m[2],10), year = parseInt(m[3],10);
+
+  const a = parseInt(m[1],10);
+  const sep = m[2];
+  const b = parseInt(m[3],10);
+  const year = parseInt(m[4],10);
+
+  let day, month;
+  if(sep === "-" || a > 12){
+    day = a; month = b;
+  }else{
+    month = a; day = b;
+  }
+
+  if(month < 1 || month > 12 || day < 1 || day > 31) return null;
   const d = new Date(year, month-1, day);
-  if(isNaN(d.getTime())) return null;
+  // Reject impossible dates (e.g. 31-02) instead of letting them roll over.
+  if(isNaN(d.getTime()) || d.getMonth() !== month-1 || d.getDate() !== day) return null;
   return d;
 }
 
-/* Returns the colour class plus a language-neutral "kind" so the same record can be
-   re-rendered in either language without re-reading the sheet. */
 function classifyPermit(rawValue){
   const s = normalize(rawValue);
 
-  // 1) Strictly empty -> awaiting response
   if(s === ""){
     return {kind:"pending", cls:"pb-soon", raw:s};
   }
 
-  // 2) Question marks only (spaces ignored) -> status undetermined
   const noSpaces = s.replace(/\s+/g,"");
   if(QUESTION_MARKS_ONLY.test(noSpaces)){
     return {kind:"undetermined", cls:"pb-unclear", raw:s};
   }
 
-  // 3) Everything else keeps the existing classification, shown as written
   if(BAN_WORDS.some(w=>s.includes(w))) return {kind:"raw", cls:"pb-ban", raw:s};
   if(RENEW_WORDS.some(w=>s.includes(w))) return {kind:"raw", cls:"pb-bad", raw:s};
   if(TEMP_WORDS.some(w=>s.includes(w))) return {kind:"raw", cls:"pb-unclear", raw:s};
@@ -1113,7 +1098,7 @@ function loadCSVRaw(url){
 
 /* ======================= Individuals ======================= */
 
-let individualsGroups = null; // Map key -> {name, nationalId, records:[...]}
+let individualsGroups = null;
 
 // Fixed column order in "تصاريح أفراد": م, م, الاسم, الوظيفة, الرقم القومى, العنوان, ملاحظات, المرسل, تصريح, Mali Day
 const IND_COL = { NAME:2, JOB:3, ID:4, ADDR:5, NOTE:6, SENDER:7, PERMIT:8, DAY:9 };
@@ -1122,7 +1107,7 @@ async function initIndividuals(){
   const statusEl = document.getElementById("ind-status");
   try{
     const rows = await loadCSVRaw(INDIVIDUALS_CSV_URL);
-    const dataRows = rows.slice(1); // skip header row
+    const dataRows = rows.slice(1);
 
     individualsGroups = new Map();
 
@@ -1130,7 +1115,7 @@ async function initIndividuals(){
       if(!cols || cols.length < 5) return;
       const idVal = normalize(cols[IND_COL.ID]);
       const nameVal = normalize(cols[IND_COL.NAME]);
-      if(!idVal && !nameVal) return; // separator / empty row
+      if(!idVal && !nameVal) return;
 
       const key = idVal ? ("ID:"+digitsOnly(idVal)) : ("NAME:"+nameVal);
       if(!individualsGroups.has(key)){
@@ -1229,9 +1214,11 @@ function searchIndividuals(query){
   resultsEl.innerHTML = "";
   if(!q){
     hintEl.style.display = "";
+    updateSearchMode();
     return;
   }
   hintEl.style.display = "none";
+  updateSearchMode();
 
   if(!individualsGroups){
     resultsEl.innerHTML = `<div class="empty-state">${escapeHtml(t("stillLoading"))}</div>`;
@@ -1325,7 +1312,7 @@ async function initVehicles(){
   const statusEl = document.getElementById("veh-status");
   try{
     const rows = await loadCSVRaw(VEHICLES_CSV_URL);
-    const dataRows = rows.slice(1); // skip header row
+    const dataRows = rows.slice(1);
 
     vehiclesGroups = new Map();
 
@@ -1399,9 +1386,11 @@ function searchVehicles(query){
   resultsEl.innerHTML = "";
   if(!qRaw){
     hintEl.style.display = "";
+    updateSearchMode();
     return;
   }
   hintEl.style.display = "none";
+  updateSearchMode();
 
   if(!vehiclesGroups){
     resultsEl.innerHTML = `<div class="empty-state">${escapeHtml(t("stillLoading"))}</div>`;
@@ -1411,7 +1400,6 @@ function searchVehicles(query){
   const isDigitsOnly = /^[0-9٠-٩]+$/.test(qRaw);
 
   if(!isDigitsOnly){
-    // has letters (with or without numbers) -> exact plate match, as written in the sheet
     const g = vehiclesGroups.get(qRaw);
     if(!g){
       resultsEl.innerHTML = `
@@ -1425,7 +1413,6 @@ function searchVehicles(query){
     return;
   }
 
-  // digits only -> show every vehicle whose plate contains this number anywhere
   const found = [];
   vehiclesGroups.forEach((g, key)=>{
     if(key.includes(qRaw)) found.push(g);
@@ -1460,7 +1447,15 @@ function escapeHtml(str){
   }[c]));
 }
 
-/* Re-render everything that was built in JS (cards, errors, status) in the new language. */
+/* Collapse the header and hand the screen over to the results whenever the
+   tab you're looking at has an active search. */
+function updateSearchMode(){
+  const activeBtn = document.querySelector(".tab-btn.active");
+  const tab = activeBtn ? activeBtn.dataset.tab : "individuals";
+  const q = tab === "individuals" ? lastIndQuery : lastVehQuery;
+  document.body.classList.toggle("search-mode", !!q);
+}
+
 function refreshDynamicUI(){
   setSystemStatus(lastSystemState);
 
@@ -1473,6 +1468,7 @@ function refreshDynamicUI(){
 
   if(lastIndQuery) searchIndividuals(lastIndQuery);
   if(lastVehQuery) searchVehicles(lastVehQuery);
+  updateSearchMode();
 }
 
 /* ======================= Wiring ======================= */
@@ -1484,6 +1480,7 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
     const tab = btn.dataset.tab;
     document.getElementById("page-individuals").style.display = tab==="individuals" ? "block" : "none";
     document.getElementById("page-vehicles").style.display = tab==="vehicles" ? "block" : "none";
+    updateSearchMode();
   });
 });
 
