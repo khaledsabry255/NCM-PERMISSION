@@ -6,14 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import io.github.khaledsabry255.permission.data.Prefs
 import io.github.khaledsabry255.permission.ui.*
 
@@ -31,11 +35,6 @@ class MainActivity : ComponentActivity() {
 
             val strings = stringsFor(lang)
             val direction = if (lang == Lang.AR) LayoutDirection.Rtl else LayoutDirection.Ltr
-
-            val onLangChange: (Lang) -> Unit = { newLang ->
-                lang = newLang
-                prefs.lang = newLang
-            }
 
             MaterialTheme(
                 colorScheme = darkColorScheme(
@@ -55,20 +54,30 @@ class MainActivity : ComponentActivity() {
                         if (!unlocked) {
                             LockScreen(
                                 strings = strings,
-                                lang = lang,
-                                onLangChange = onLangChange,
                                 onUnlocked = {
                                     prefs.markUnlocked()
                                     unlocked = true
                                 }
                             )
                         } else {
-                            SearchScreen(
-                                strings = strings,
-                                lang = lang,
-                                onLangChange = onLangChange
-                            )
+                            SearchScreen(strings = strings, lang = lang)
                         }
+
+                        // Rendered once, at the root, above both screens, and pinned to a
+                        // physical corner (AbsoluteAlignment) — so it cannot move when the
+                        // header collapses or when the layout direction flips.
+                        LangSwitch(
+                            lang = lang,
+                            onLangChange = { newLang ->
+                                lang = newLang
+                                prefs.lang = newLang
+                            },
+                            modifier = Modifier
+                                .align(AbsoluteAlignment.TopRight)
+                                .statusBarsPadding()
+                                // absolutePadding, not padding: `end` would flip sides in RTL.
+                                .absolutePadding(top = 14.dp, right = 12.dp)
+                        )
                     }
                 }
             }

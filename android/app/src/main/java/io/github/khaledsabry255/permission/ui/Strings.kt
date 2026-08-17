@@ -12,11 +12,9 @@ enum class Lang { AR, EN }
  */
 data class Strings(
     val appTitle: String,
-    val secureAccess: String,
     val pinLabel: String,
     val pinHint: String,
     val pinError: String,
-    val brandSub: String,
     val statusUpdating: String,
     val statusOnline: String,
     val statusError: String,
@@ -87,11 +85,9 @@ fun permitText(status: PermitStatus, lang: Lang, s: Strings): String = when (sta
 
 val AR_STRINGS = Strings(
     appTitle = "بحث التصاريح",
-    secureAccess = "SECURE ACCESS",
     pinLabel = "أدخل رمز الدخول",
     pinHint = "اضغط هنا لفتح لوحة المفاتيح",
     pinError = "رمز الدخول غير صحيح",
-    brandSub = "PERMISSION SEARCH",
     statusUpdating = "جاري التحديث",
     statusOnline = "متصل",
     statusError = "خطأ في الاتصال",
@@ -128,11 +124,9 @@ val AR_STRINGS = Strings(
 
 val EN_STRINGS = Strings(
     appTitle = "Permit Search",
-    secureAccess = "SECURE ACCESS",
     pinLabel = "Enter access code",
     pinHint = "Tap here to open the keyboard",
     pinError = "Incorrect access code",
-    brandSub = "PERMISSION SEARCH",
     statusUpdating = "Updating",
     statusOnline = "Connected",
     statusError = "Connection error",
