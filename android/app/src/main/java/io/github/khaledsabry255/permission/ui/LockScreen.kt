@@ -18,13 +18,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,8 +38,6 @@ import kotlin.math.roundToInt
 @Composable
 fun LockScreen(
     strings: Strings,
-    lang: Lang,
-    onLangChange: (Lang) -> Unit,
     onUnlocked: () -> Unit
 ) {
     var pin by remember { mutableStateOf("") }
@@ -70,17 +67,13 @@ fun LockScreen(
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
-
-        LangSwitch(
-            lang = lang,
-            onLangChange = onLangChange,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(20.dp)
-        )
-
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(listOf(Palette.BgDeep, Palette.BgMid))
+            )
+    ) {
         Column(
             Modifier
                 .align(Alignment.Center)
@@ -88,31 +81,13 @@ fun LockScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ShieldLogo(size = 72.dp, strokeWidth = 4.5f, showInnerRing = true)
+            NcmLogo(markSize = 52.sp, subSize = 12.sp, subSpacing = 4.8.sp)
 
-            Spacer(Modifier.height(14.dp))
-
-            Text(
-                strings.appTitle,
-                color = Palette.TextMain,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                strings.secureAccess,
-                color = Palette.GoldSoft,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 4.sp
-            )
-
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.height(40.dp))
 
             Text(strings.pinLabel, color = Palette.TextDim, fontSize = 13.sp)
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(16.dp))
 
             BasicTextField(
                 value = pin,
@@ -145,7 +120,7 @@ fun LockScreen(
                             .clip(RoundedCornerShape(14.dp))
                             .background(Color.White.copy(alpha = 0.03f))
                             .border(
-                                BorderStroke(1.dp, if (error) Palette.Bad else Palette.Gold.copy(alpha = 0.25f)),
+                                BorderStroke(1.dp, if (error) Palette.Bad else Palette.Gold.copy(alpha = 0.3f)),
                                 RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -164,7 +139,7 @@ fun LockScreen(
                                                 when {
                                                     error -> Palette.Bad
                                                     filled -> Palette.Gold
-                                                    else -> Palette.Gold.copy(alpha = 0.4f)
+                                                    else -> Palette.Gold.copy(alpha = 0.45f)
                                                 }
                                             ),
                                             CircleShape
@@ -178,7 +153,7 @@ fun LockScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text(strings.pinHint, color = Color(0xFF5C6B68), fontSize = 11.sp)
+            Text(strings.pinHint, color = Color(0xFF5F6B5F), fontSize = 11.sp)
 
             Spacer(Modifier.height(8.dp))
             Text(

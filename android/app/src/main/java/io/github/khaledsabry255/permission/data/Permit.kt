@@ -24,21 +24,46 @@ object Permit {
     private val RENEW_WORDS = listOf("عايز تجديد", "الرخصه منتهيه", "غيرت لوحات", "تجديد")
     private val TEMP_WORDS = listOf("مؤقت")
 
-    private val DATE_RE = Regex("""^(\d{1,2})[-/](\d{1,2})[-/](\d{4})""")
+    private val DATE_RE = Regex("""^(\d{1,2})([-/])(\d{1,2})[-/](\d{4})""")
 
     fun normalize(s: String?): String =
         (s ?: "").replace(Regex("""\s+"""), " ").trim()
 
-    /** Sheet dates are dd-mm-yyyy or dd/mm/yyyy — never ISO. */
+    /**
+     * The sheet hands us two different date shapes:
+     *   "18-11-2025"  text cells typed by hand              -> day first
+     *   "11/30/2025"  real date cells, exported in US order -> month first
+     *
+     * Reading a slash date as day-first turns 11/30/2025 into month 30, which
+     * rolls forward into 2028 and paints an expired permit green. Pick the order
+     * from the separator, and fall back to day-first when the numbers rule out
+     * month-first.
+     */
     fun parseDate(v: String?): Long? {
         val s = normalize(v)
         if (s.isEmpty()) return null
         val m = DATE_RE.find(s) ?: return null
-        val (d, mo, y) = m.destructured
+        val (aStr, sep, bStr, yStr) = m.destructured
+
+        val a = aStr.toInt()
+        val b = bStr.toInt()
+        val year = yStr.toInt()
+
+        val day: Int
+        val month: Int
+        if (sep == "-" || a > 12) {
+            day = a; month = b
+        } else {
+            month = a; day = b
+        }
+
+        if (month !in 1..12 || day !in 1..31) return null
+
         return try {
             val cal = Calendar.getInstance()
+            cal.isLenient = false // reject 31-02 instead of rolling it over
             cal.clear()
-            cal.set(y.toInt(), mo.toInt() - 1, d.toInt())
+            cal.set(year, month - 1, day)
             cal.timeInMillis
         } catch (e: Exception) {
             null

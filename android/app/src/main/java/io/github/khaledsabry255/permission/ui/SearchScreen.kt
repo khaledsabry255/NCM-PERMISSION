@@ -43,7 +43,7 @@ private sealed interface LoadState {
 }
 
 @Composable
-fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
+fun SearchScreen(strings: Strings, lang: Lang) {
 
     var state by remember { mutableStateOf<LoadState>(LoadState.Loading) }
     var attempt by remember { mutableIntStateOf(0) }
@@ -63,13 +63,16 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
     var indSubmitted by rememberSaveable { mutableStateOf("") }
     var vehSubmitted by rememberSaveable { mutableStateOf("") }
 
+    // Once a search is live, everything that isn't a result gets out of the way.
+    val searchMode = if (tab == 0) indSubmitted.isNotBlank() else vehSubmitted.isNotBlank()
+
     Column(Modifier.fillMaxSize()) {
 
-        Header(strings, lang, onLangChange, state)
+        Header(strings, state, searchMode)
 
         Column(Modifier.padding(horizontal = 16.dp)) {
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(if (searchMode) 10.dp else 18.dp))
 
             Tabs(
                 strings = strings,
@@ -77,13 +80,14 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
                 onSelect = { tab = it }
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(if (searchMode) 10.dp else 16.dp))
 
             if (tab == 0) {
                 SearchCard(
                     value = indQuery,
                     placeholder = strings.searchPlaceholderInd,
                     buttonLabel = strings.searchBtn,
+                    compact = searchMode,
                     onValueChange = { indQuery = it },
                     onSubmit = { indSubmitted = indQuery },
                     onClear = { indQuery = ""; indSubmitted = "" }
@@ -93,6 +97,7 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
                     value = vehQuery,
                     placeholder = strings.searchPlaceholderVeh,
                     buttonLabel = strings.searchBtn,
+                    compact = searchMode,
                     onValueChange = { vehQuery = it },
                     onSubmit = { vehSubmitted = vehQuery },
                     onClear = { vehQuery = ""; vehSubmitted = "" }
@@ -190,56 +195,45 @@ private fun VehicleResults(
 @Composable
 private fun Header(
     strings: Strings,
-    lang: Lang,
-    onLangChange: (Lang) -> Unit,
-    state: LoadState
+    state: LoadState,
+    searchMode: Boolean
 ) {
     Box(
         Modifier
             .fillMaxWidth()
             .background(Palette.BgDeep)
             .statusBarsPadding()
-            .padding(top = 18.dp, bottom = 16.dp)
+            .padding(
+                top = if (searchMode) 8.dp else 20.dp,
+                bottom = if (searchMode) 8.dp else 14.dp
+            )
     ) {
-        LangSwitch(
-            lang = lang,
-            onLangChange = onLangChange,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(horizontal = 14.dp)
-        )
-
         Column(
             Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ShieldLogo(size = 46.dp, strokeWidth = 6f)
-            Spacer(Modifier.height(8.dp))
-            Text("NCM", color = Palette.TextMain, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-            Spacer(Modifier.height(3.dp))
-            Text(
-                strings.brandSub,
-                color = Palette.GoldSoft,
-                fontSize = 12.5.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.5.sp
-            )
-            Spacer(Modifier.height(9.dp))
+            if (searchMode) {
+                NcmLogo(markSize = 21.sp, subSize = 5.8.sp, subSpacing = 2.1.sp)
+            } else {
+                NcmLogo(markSize = 40.sp, subSize = 9.4.sp, subSpacing = 3.8.sp)
 
-            val (dotColor, label) = when (state) {
-                is LoadState.Loading -> Palette.Soon to strings.statusUpdating
-                is LoadState.Failed -> Palette.Bad to strings.statusError
-                is LoadState.Ready -> Palette.Ok to strings.statusOnline
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(dotColor)
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(label, color = Palette.TextDim, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(11.dp))
+
+                val (dotColor, label) = when (state) {
+                    is LoadState.Loading -> Palette.Soon to strings.statusUpdating
+                    is LoadState.Failed -> Palette.Bad to strings.statusError
+                    is LoadState.Ready -> Palette.Ok to strings.statusOnline
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(dotColor)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(label, color = Palette.TextDim, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
@@ -248,7 +242,7 @@ private fun Header(
         Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(Color.White.copy(alpha = 0.07f))
     )
 }
 
@@ -276,7 +270,7 @@ private fun TabButton(
     onClick: () -> Unit,
     icon: DrawScope.(Color) -> Unit
 ) {
-    val content = if (active) Color(0xFF06120F) else Palette.TextDim
+    val content = if (active) Palette.OnGold else Palette.TextDim
     Row(
         modifier
             .clip(RoundedCornerShape(9.dp))
@@ -297,6 +291,7 @@ private fun SearchCard(
     value: String,
     placeholder: String,
     buttonLabel: String,
+    compact: Boolean,
     onValueChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onClear: () -> Unit
@@ -306,10 +301,14 @@ private fun SearchCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.03f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), RoundedCornerShape(14.dp))
-            .padding(14.dp)
+            .then(
+                if (compact) Modifier
+                else Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White.copy(alpha = 0.03f))
+                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), RoundedCornerShape(14.dp))
+                    .padding(14.dp)
+            )
     ) {
         Row(
             Modifier
@@ -357,26 +356,30 @@ private fun SearchCard(
             }
         }
 
-        Spacer(Modifier.height(8.dp))
+        // Once results are on screen the button is dead weight — the field's own
+        // Search key does the same job.
+        if (!compact) {
+            Spacer(Modifier.height(8.dp))
 
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Palette.Gold)
-                .clickable {
-                    keyboard?.hide()
-                    onSubmit()
-                }
-                .padding(vertical = 13.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                buttonLabel,
-                color = Color(0xFF06120F),
-                fontSize = 14.5.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Palette.Gold)
+                    .clickable {
+                        keyboard?.hide()
+                        onSubmit()
+                    }
+                    .padding(vertical = 13.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    buttonLabel,
+                    color = Palette.OnGold,
+                    fontSize = 14.5.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+            }
         }
     }
 }
@@ -459,7 +462,7 @@ private fun ErrorState(strings: Strings, detail: String, onRetry: () -> Unit) {
         ) {
             Text(
                 strings.retry,
-                color = Color(0xFF06120F),
+                color = Palette.OnGold,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold
             )
