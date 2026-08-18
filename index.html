@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>NCM Permission Search</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0D1210">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="NCM Permits">
 <meta name="referrer" content="no-referrer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,24 +20,29 @@
 <style>
 
 :root{
-  --bg-deep:#0D1210;
-  --bg-mid:#121815;
-  --glass-border:rgba(255,255,255,0.14);
-  --gold:#C9A961;
-  --gold-soft:#E0C489;
-  --on-gold:#0D1210;
-  --brand-green:#4CAF50;
-  --text-main:#F2EFE6;
-  --text-dim:#9AA39B;
-  --ok:#3ecf8e;
-  --ok-bg:rgba(62,207,142,0.14);
-  --soon:#E89B3C;
-  --soon-bg:rgba(232,155,60,0.15);
-  --bad:#ef6a6a;
-  --bad-bg:rgba(239,106,106,0.15);
-  --ban:#ff3b3b;
-  --unclear:#A8B0A8;
-  --unclear-bg:rgba(168,176,168,0.14);
+  /* Brand, taken from the NCM wordmark */
+  --blue:#1565C0;
+  --blue-deep:#0E4C93;
+  --green:#4BA548;
+  --grey:#474D54;
+
+  --page:#EDF2F8;
+  --card:#FFFFFF;
+  --field:#F3F7FB;
+  --tint:#E6EEF8;
+  --line:#D2DEEC;
+  --line-soft:#E2E9F2;
+  --edge:#C0D3EC;
+
+  --ink:#0B1114;
+  --ink-2:#2A3238;
+
+  --ok:#12874F;      --ok-bg:#DFF3E7;    --ok-br:#8FD3AE;
+  --soon:#B96E08;    --soon-bg:#FCEBD5;  --soon-br:#EFC383;
+  --bad:#C22F2F;     --bad-bg:#FBE3E3;   --bad-br:#EFA9A9;
+  --ban:#A31515;     --ban-bg:#F6D6D6;   --ban-br:#E08A8A;
+  --unclear:#5A646C; --unclear-bg:#EDF0F3; --unclear-br:#CBD3DB;
+
   --topbar-h:66px;
 }
 
@@ -46,35 +51,22 @@ html,body{margin:0;padding:0;}
 body{
   min-height:100vh;
   font-family:'IBM Plex Sans Arabic','Tajawal',sans-serif;
-  color:var(--text-main);
-  background:var(--bg-deep);
+  color:var(--ink);
+  background:var(--page);
   -webkit-tap-highlight-color:transparent;
   padding-top:calc(var(--topbar-h) + env(safe-area-inset-top));
-}
-
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 50% -10%, rgba(201,169,97,0.09), transparent 55%),
-    radial-gradient(circle at 15% 105%, rgba(76,175,80,0.05), transparent 45%),
-    linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
 }
 
 /* Latin digits, laid out left-to-right even inside Arabic text. */
 .num{ direction:ltr; unicode-bidi:embed; display:inline-block; }
 
 .wrap{
-  position:relative; z-index:1;
   max-width:640px;
   margin:0 auto;
-  padding:0 16px calc(40px + env(safe-area-inset-bottom));
+  padding:0 14px calc(40px + env(safe-area-inset-bottom));
 }
 
-/* ---- Top bar: search + language, pinned to the very top of the screen ---- */
+/* ---- Top bar: search + language, pinned to the very top ---- */
 .topbar{
   position:fixed;
   top:0; left:0; right:0;
@@ -82,24 +74,17 @@ body::before{
   display:flex;
   align-items:center;
   gap:8px;
-  padding:12px;
-  padding-top:calc(12px + env(safe-area-inset-top));
-  background:rgba(13,18,16,0.97);
-  border-bottom:1px solid rgba(255,255,255,0.07);
-  backdrop-filter:blur(10px);
-  /* Fixed physical order [field][pill]: without this the row reverses with the
-     text direction and the language pill jumps sides when you switch language. */
+  padding:11px 12px;
+  padding-top:calc(11px + env(safe-area-inset-top));
+  background:var(--card);
+  border-bottom:1px solid var(--line);
+  /* Fixed physical order [field][pill]: laid out with the text direction the
+     row reverses, and the pill jumps sides when the language changes. */
   direction:ltr;
 }
-/* While the PIN screen is up there is nothing to search, but the language
-   pill must not jump — so hide only the field and leave the pill in place. */
 body:not(.unlocked) .search-input-wrap{ visibility:hidden; }
 
-.search-input-wrap{
-  position:relative;
-  flex:1;
-  min-width:0;
-}
+.search-input-wrap{ position:relative; flex:1; min-width:0; }
 .search-icon-btn{
   position:absolute;
   top:50%; inset-inline-start:6px;
@@ -109,27 +94,28 @@ body:not(.unlocked) .search-input-wrap{ visibility:hidden; }
   border:none;
   border-radius:8px;
   background:transparent;
-  color:var(--gold);
+  color:var(--blue);
   cursor:pointer;
   padding:0;
 }
-.search-icon-btn:active{ background:rgba(201,169,97,0.14); }
+.search-icon-btn:active{ background:var(--tint); }
 .topbar input{
   width:100%;
   padding-block:11px;
   padding-inline-start:40px;
   padding-inline-end:36px;
   border-radius:9px;
-  border:1px solid var(--glass-border);
-  background:rgba(0,0,0,0.28);
-  color:var(--text-main);
+  border:1px solid var(--line);
+  background:var(--field);
+  color:var(--ink);
   font-family:inherit;
   font-size:14.5px;
+  font-weight:600;
   outline:none;
   transition:border-color .15s ease, box-shadow .15s ease;
 }
-.topbar input::placeholder{ color:var(--text-dim); }
-.topbar input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,169,97,0.14); }
+.topbar input::placeholder{ color:var(--ink-2); font-weight:400; }
+.topbar input:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(21,101,192,0.14); }
 .clear-btn{
   position:absolute;
   top:50%; inset-inline-end:8px;
@@ -140,8 +126,8 @@ body:not(.unlocked) .search-input-wrap{ visibility:hidden; }
   justify-content:center;
   border:none;
   border-radius:50%;
-  background:rgba(255,255,255,0.1);
-  color:var(--text-dim);
+  background:#DCE4EE;
+  color:var(--ink-2);
   cursor:pointer;
   padding:0;
 }
@@ -151,15 +137,15 @@ body:not(.unlocked) .search-input-wrap{ visibility:hidden; }
   display:flex;
   gap:2px;
   padding:3px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.14);
+  background:var(--field);
+  border:1px solid var(--line);
   border-radius:100px;
   flex-shrink:0;
 }
 .lang-opt{
   border:none;
   background:transparent;
-  color:var(--text-dim);
+  color:var(--ink-2);
   font-family:inherit;
   font-size:11.5px;
   font-weight:800;
@@ -169,50 +155,49 @@ body:not(.unlocked) .search-input-wrap{ visibility:hidden; }
   transition:background .15s ease, color .15s ease;
   min-width:32px;
 }
-.lang-opt.active{ background:var(--gold); color:var(--on-gold); }
+.lang-opt.active{ background:var(--blue); color:#fff; }
 
-/* ---- NCM wordmark (text, not an image: stays sharp at any size) ---- */
+/* ---- NCM wordmark: N blue, C green, M dark grey ---- */
 .logo-mark{ text-align:center; line-height:1; }
 .logo-ncm{
   font-family:'Montserrat',sans-serif;
-  font-weight:900;
-  letter-spacing:1px;
-  color:#ffffff;
+  font-weight:800;
+  letter-spacing:-.005em;
+  color:var(--blue);
 }
-.logo-ncm .c{ color:var(--brand-green); }
+.logo-ncm .c{ color:var(--green); }
+.logo-ncm .m{ color:var(--grey); }
 .logo-sub{
   font-family:'Montserrat',sans-serif;
-  font-weight:700;
-  color:var(--gold);
+  font-weight:600;
+  color:var(--grey);
   white-space:nowrap;
 }
-.logo-xl .logo-ncm{ font-size:52px; }
-.logo-xl .logo-sub{ font-size:12px; letter-spacing:4.8px; margin-top:11px; }
+.logo-xl .logo-ncm{ font-size:56px; }
+.logo-xl .logo-sub{ font-size:12.2px; letter-spacing:2.9px; margin-top:11px; }
 .logo-lg .logo-ncm{ font-size:40px; }
-.logo-lg .logo-sub{ font-size:9.4px; letter-spacing:3.8px; margin-top:9px; }
+.logo-lg .logo-sub{ font-size:8.6px; letter-spacing:2.05px; margin-top:8px; }
+.logo-sm .logo-ncm{ font-size:22px; }
+.logo-sm .logo-sub{ font-size:4.8px; letter-spacing:1.1px; margin-top:4px; }
 
-/* ---- Header (logo + connection state) ---- */
+/* ---- Header ---- */
 .app-header{
   text-align:center;
-  padding:18px 16px 14px;
-  margin:0 -16px 4px;
-  border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:16px;
+  margin:0 -14px 0;
+  background:var(--card);
+  border-bottom:1px solid var(--line);
 }
 .system-status{
   display:inline-flex;
   align-items:center;
   gap:6px;
   font-size:10.5px;
-  color:var(--text-dim);
+  color:var(--ink-2);
   font-weight:600;
-  margin-top:11px;
+  margin-top:10px;
 }
-.status-dot{
-  width:7px; height:7px;
-  border-radius:50%;
-  background:var(--ok);
-  flex-shrink:0;
-}
+.status-dot{ width:7px; height:7px; border-radius:50%; background:var(--ok); flex-shrink:0; }
 .status-dot.updating{ background:var(--soon); animation:statusPulse 1.1s infinite; }
 .status-dot.error{ background:var(--bad); }
 @keyframes statusPulse{ 0%{opacity:1;} 50%{opacity:.35;} 100%{opacity:1;} }
@@ -224,22 +209,22 @@ body.search-mode .app-header{ display:none; }
 .tabs{
   display:flex;
   gap:4px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:12px;
-  padding:4px;
-  margin:14px 0;
+  background:var(--field);
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:3px;
+  margin:12px 0;
 }
 body.search-mode .tabs{ margin:10px 0; }
 .tab-btn{
   flex:1;
   border:none;
-  border-radius:9px;
+  border-radius:8px;
   padding:9px 10px;
   background:transparent;
-  color:var(--text-dim);
+  color:var(--ink-2);
   font-family:inherit;
-  font-size:13.5px;
+  font-size:13px;
   font-weight:700;
   cursor:pointer;
   transition:all .15s ease;
@@ -248,15 +233,11 @@ body.search-mode .tabs{ margin:10px 0; }
   justify-content:center;
   gap:7px;
 }
-.tab-btn.active{
-  background:var(--gold);
-  color:var(--on-gold);
-  box-shadow:0 4px 14px rgba(201,169,97,0.22);
-}
+.tab-btn.active{ background:var(--blue); color:#fff; }
 
 .status-line{
   text-align:center;
-  color:var(--text-dim);
+  color:var(--ink-2);
   font-size:12.5px;
   margin-top:10px;
   display:flex;
@@ -268,8 +249,8 @@ body.search-mode .tabs{ margin:10px 0; }
 .spinner{
   width:13px; height:13px;
   border-radius:50%;
-  border:2px solid rgba(201,169,97,0.25);
-  border-top-color:var(--gold);
+  border:2px solid var(--edge);
+  border-top-color:var(--blue);
   animation:spin .7s linear infinite;
   flex-shrink:0;
 }
@@ -277,7 +258,7 @@ body.search-mode .tabs{ margin:10px 0; }
 
 .search-hint, .empty-state{
   text-align:center;
-  color:var(--text-dim);
+  color:var(--ink-2);
   padding:44px 20px;
   font-size:13.5px;
   line-height:1.8;
@@ -285,102 +266,94 @@ body.search-mode .tabs{ margin:10px 0; }
 .search-hint svg, .empty-state svg{
   display:block;
   margin:0 auto 12px;
-  color:rgba(154,163,155,0.5);
+  color:#93A3B6;
 }
-.empty-state b{color:var(--text-main);}
+.empty-state b{ color:var(--ink); }
 
-.results{
-  margin-top:14px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
+.results{ margin-top:12px; display:flex; flex-direction:column; gap:12px; }
 
 /* ---- Record card ---- */
 .person-card{
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.09);
-  border-radius:16px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:15px;
   overflow:hidden;
+  box-shadow:0 2px 10px rgba(21,101,192,0.07);
   animation:recordIn .25s ease;
 }
 @keyframes recordIn{
   from{ opacity:0; transform:translateY(6px); }
   to{ opacity:1; transform:translateY(0); }
 }
-.person-head{ padding:14px 18px 0; }
+.person-head{ padding:13px 15px 0; }
 .record-top{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  margin-bottom:12px;
+  margin-bottom:11px;
 }
-.record-identity{ min-width:0; padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.08); }
+.record-identity{ min-width:0; padding-bottom:13px; border-bottom:1px solid var(--line-soft); }
 .record-name{
   font-family:'Tajawal',sans-serif;
   font-weight:800;
-  font-size:21px;
-  color:var(--text-main);
-  line-height:1.3;
+  font-size:19px;
+  color:var(--ink);
+  line-height:1.35;
   text-align:center;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:12px;
-  padding:14px 10px;
-  margin-bottom:10px;
+  background:var(--tint);
+  border:1px solid var(--edge);
+  border-radius:11px;
+  padding:12px 10px;
+  margin-bottom:8px;
 }
 .record-subid{
   text-align:center;
   font-weight:700;
-  font-size:15.5px;
-  letter-spacing:.5px;
-  color:var(--gold-soft);
-  background:rgba(201,169,97,0.07);
-  border:1px solid rgba(201,169,97,0.26);
-  border-radius:12px;
-  padding:11px 10px;
+  font-size:15px;
+  letter-spacing:.4px;
+  color:var(--ink);
+  background:var(--card);
+  border:1px solid var(--edge);
+  border-radius:11px;
+  padding:10px;
 }
 .count-badge{
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  color:var(--text-dim);
-  font-size:11px;
+  background:var(--field);
+  border:1px solid var(--line);
+  color:var(--ink-2);
+  font-size:10.5px;
   font-weight:700;
-  padding:5px 10px;
+  padding:4px 9px;
   border-radius:100px;
   white-space:nowrap;
   flex-shrink:0;
 }
 
-.occ-selector{ display:flex; gap:6px; overflow-x:auto; }
+.occ-selector{ display:flex; gap:5px; overflow-x:auto; }
 .occ-chip{
   flex-shrink:0;
-  min-width:32px;
-  height:32px;
-  padding:0 10px;
+  min-width:30px;
+  height:30px;
+  padding:0 9px;
   border-radius:8px;
-  border:1px solid var(--glass-border);
-  background:rgba(255,255,255,0.03);
-  color:var(--text-dim);
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--ink-2);
   font-family:inherit;
-  font-size:13px;
+  font-size:12.5px;
   font-weight:700;
   cursor:pointer;
   transition:all .15s ease;
 }
-.occ-chip.active{
-  background:rgba(201,169,97,0.16);
-  border-color:var(--gold);
-  color:var(--gold-soft);
-}
+.occ-chip.active{ background:var(--blue); border-color:var(--blue); color:#fff; }
 
-.occ-content{ padding:14px 18px 18px; }
+.occ-content{ padding:13px 15px 15px; }
 
 .record-rows{
   display:flex;
   flex-direction:column;
-  border:1px solid rgba(255,255,255,0.07);
+  border:1px solid var(--line-soft);
   border-radius:10px;
   overflow:hidden;
 }
@@ -389,24 +362,19 @@ body.search-mode .tabs{ margin:10px 0; }
   align-items:center;
   justify-content:space-between;
   gap:14px;
-  padding:10px 14px;
-  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:10px 13px;
+  border-bottom:1px solid var(--line-soft);
   font-size:13.5px;
 }
 .record-row:last-child{ border-bottom:none; }
 .record-row .k{
-  color:var(--text-dim);
+  color:var(--ink-2);
   font-weight:600;
   font-size:12px;
   white-space:nowrap;
   flex-shrink:0;
 }
-.record-row .v{
-  color:var(--text-main);
-  font-weight:600;
-  text-align:end;
-  flex:1;
-}
+.record-row .v{ color:var(--ink); font-weight:700; text-align:end; flex:1; }
 
 /* ---- Permit status banner ---- */
 .permit-banner{
@@ -414,63 +382,58 @@ body.search-mode .tabs{ margin:10px 0; }
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  padding:14px 16px;
-  border-radius:12px;
+  padding:12px 14px;
+  border-radius:11px;
   border:1.5px solid transparent;
-  margin-bottom:14px;
+  margin-bottom:12px;
 }
-.permit-banner .pb-left{ display:flex; align-items:center; gap:10px; }
+.permit-banner .pb-left{ display:flex; align-items:center; gap:9px; }
 .permit-icon{
-  width:34px; height:34px;
+  width:30px; height:30px;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
   flex-shrink:0;
+  color:#fff;
 }
-.permit-banner .pb-tag{ font-size:11px; font-weight:700; }
+.permit-banner .pb-tag{ font-size:10.5px; font-weight:700; }
 .pb-body{ text-align:end; min-width:0; }
-.permit-banner .pb-value{ font-size:16px; font-weight:800; }
-.permit-banner .pb-extra{
-  font-size:11px;
-  font-weight:600;
-  opacity:.75;
-  margin-top:3px;
-}
-.pb-ok{ background:var(--ok-bg); border-color:rgba(62,207,142,0.42); color:var(--ok); }
-.pb-ok .permit-icon{ background:rgba(62,207,142,0.2); }
-.pb-soon{ background:var(--soon-bg); border-color:rgba(232,155,60,0.42); color:var(--soon); }
-.pb-soon .permit-icon{ background:rgba(232,155,60,0.2); }
-.pb-bad{ background:var(--bad-bg); border-color:rgba(239,106,106,0.42); color:var(--bad); }
-.pb-bad .permit-icon{ background:rgba(239,106,106,0.2); }
-.pb-ban{ background:var(--ban); border-color:var(--ban); color:#fff; }
-.pb-ban .permit-icon{ background:rgba(255,255,255,0.22); }
-.pb-unclear{ background:var(--unclear-bg); border-color:rgba(168,176,168,0.42); color:var(--unclear); }
-.pb-unclear .permit-icon{ background:rgba(168,176,168,0.2); }
+.permit-banner .pb-value{ font-size:15.5px; font-weight:800; }
+.permit-banner .pb-extra{ font-size:11px; font-weight:600; opacity:.8; margin-top:3px; }
+
+.pb-ok{ background:var(--ok-bg); border-color:var(--ok-br); color:var(--ok); }
+.pb-ok .permit-icon{ background:var(--ok); }
+.pb-soon{ background:var(--soon-bg); border-color:var(--soon-br); color:var(--soon); }
+.pb-soon .permit-icon{ background:var(--soon); }
+.pb-bad{ background:var(--bad-bg); border-color:var(--bad-br); color:var(--bad); }
+.pb-bad .permit-icon{ background:var(--bad); }
+.pb-ban{ background:var(--ban-bg); border-color:var(--ban-br); color:var(--ban); }
+.pb-ban .permit-icon{ background:var(--ban); }
+.pb-unclear{ background:var(--unclear-bg); border-color:var(--unclear-br); color:var(--unclear); }
+.pb-unclear .permit-icon{ background:var(--unclear); }
 
 .occ-date-box{
   text-align:center;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:12px;
-  padding:12px 10px;
-  margin-bottom:14px;
+  background:var(--tint);
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:11px 10px;
+  margin-bottom:12px;
 }
-.occ-date-box .odb-label{ font-weight:700; font-size:14px; color:var(--text-main); }
-.occ-date-box .odb-value{ font-size:13px; color:var(--gold-soft); font-weight:700; margin-top:5px; }
-.occ-date-box .odb-extra{ font-size:11.5px; color:var(--text-dim); margin-top:4px; }
+.occ-date-box .odb-label{ font-weight:700; font-size:13px; color:var(--ink); }
+.occ-date-box .odb-value{ font-size:13px; color:var(--ink); font-weight:800; margin-top:4px; }
+.occ-date-box .odb-extra{ font-size:11px; color:var(--ink-2); margin-top:3px; }
 
 footer{
   text-align:center;
-  color:var(--text-dim);
+  color:var(--ink-2);
   font-size:11.5px;
-  margin-top:36px;
-  opacity:.55;
+  margin-top:32px;
+  opacity:.75;
   line-height:1.8;
 }
 body.search-mode footer{ display:none; }
-
-@media (max-width:480px){ .record-name{ font-size:19px; } }
 
 /* ======================= Lock Screen ======================= */
 
@@ -485,30 +448,30 @@ body.unlocked #lock-screen{ display:none; }
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(165deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
+  background:linear-gradient(170deg, #FFFFFF 0%, var(--tint) 100%);
   padding:24px;
 }
 .lock-card{ width:100%; max-width:340px; text-align:center; }
-.lock-logo{ margin-bottom:40px; }
+.lock-logo{ margin-bottom:44px; }
 
-.pin-label{ font-size:13px; color:var(--text-dim); margin-bottom:16px; }
+.pin-label{ font-size:13px; color:var(--ink-2); margin-bottom:16px; }
 .pin-dots-box{
   padding:18px 0;
-  border:1px solid rgba(201,169,97,0.3);
+  border:1px solid var(--edge);
   border-radius:14px;
-  background:rgba(255,255,255,0.03);
+  background:var(--card);
   cursor:pointer;
 }
-.pin-dots-box:focus-within{ border-color:var(--gold); }
+.pin-dots-box:focus-within{ border-color:var(--blue); }
 .pin-dots{ display:flex; justify-content:center; gap:14px; }
 .pin-dot{
   width:14px; height:14px;
   border-radius:50%;
-  border:1.5px solid rgba(201,169,97,0.45);
+  border:1.5px solid var(--edge);
   background:transparent;
   transition:background .15s ease, transform .15s ease, border-color .15s ease;
 }
-.pin-dot.filled{ background:var(--gold); border-color:var(--gold); transform:scale(1.1); }
+.pin-dot.filled{ background:var(--blue); border-color:var(--blue); transform:scale(1.1); }
 .pin-dots.shake{ animation:pinShake .4s ease; }
 .pin-dots.shake .pin-dot{ border-color:var(--bad); }
 @keyframes pinShake{
@@ -517,7 +480,7 @@ body.unlocked #lock-screen{ display:none; }
   30%,50%,70% { transform:translateX(-5px); }
   40%,60% { transform:translateX(5px); }
 }
-.pin-tap-hint{ font-size:11px; color:#5f6b5f; margin-top:12px; transition:opacity .15s ease; }
+.pin-tap-hint{ font-size:11px; color:#6B7885; margin-top:12px; transition:opacity .15s ease; }
 .pin-error{
   height:16px;
   font-size:12.5px;
@@ -530,19 +493,17 @@ body.unlocked #lock-screen{ display:none; }
 .pin-hidden-input{ position:absolute; opacity:0; width:1px; height:1px; border:none; padding:0; }
 
 @media (max-width:380px){
-  .logo-xl .logo-ncm{ font-size:44px; }
-  .logo-xl .logo-sub{ font-size:10.4px; letter-spacing:4px; }
+  .logo-xl .logo-ncm{ font-size:46px; }
+  .logo-xl .logo-sub{ font-size:10px; letter-spacing:2.4px; }
 }
 </style>
 </head>
 <body>
 
-<!-- Search and language live together in one bar pinned to the top of the
-     screen, so the field is always reachable and the pill never shifts. -->
 <div class="topbar">
   <div class="search-input-wrap">
     <button type="button" class="search-icon-btn" id="main-search-btn" aria-label="Search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
     </button>
     <input id="main-input" type="text" dir="auto" autocomplete="off" data-i18n-placeholder="searchPlaceholderInd" placeholder="الرقم القومى أو الاسم">
     <button type="button" class="clear-btn" id="main-clear" aria-label="Clear">
@@ -559,7 +520,7 @@ body.unlocked #lock-screen{ display:none; }
   <div class="lock-card">
     <div class="lock-logo">
       <div class="logo-mark logo-xl">
-        <div class="logo-ncm">N<span class="c">C</span>M</div>
+        <div class="logo-ncm">N<span class="c">C</span><span class="m">M</span></div>
         <div class="logo-sub">NUCLEAR CONCRETE MIXES</div>
       </div>
     </div>
@@ -584,7 +545,7 @@ body.unlocked #lock-screen{ display:none; }
 
   <div class="app-header">
     <div class="logo-mark logo-lg">
-      <div class="logo-ncm">N<span class="c">C</span>M</div>
+      <div class="logo-ncm">N<span class="c">C</span><span class="m">M</span></div>
       <div class="logo-sub">NUCLEAR CONCRETE MIXES</div>
     </div>
     <div class="system-status">
@@ -624,7 +585,7 @@ body.unlocked #lock-screen{ display:none; }
 
   <footer>
     <div>NCM &middot; <span data-i18n="appTitle">بحث التصاريح</span></div>
-    <div class="num">v4.0</div>
+    <div class="num">v5.0</div>
   </footer>
 
 </div>
@@ -785,13 +746,8 @@ applyStaticI18n();
   const dotsBox = document.getElementById("pin-dots-box");
   const tapHint = document.getElementById("pin-tap-hint");
 
-  function renderDots(){
-    dots.forEach((d,i)=> d.classList.toggle("filled", i < entered.length));
-  }
-  function clearError(){
-    errorEl.classList.remove("show");
-    dotsWrap.classList.remove("shake");
-  }
+  function renderDots(){ dots.forEach((d,i)=> d.classList.toggle("filled", i < entered.length)); }
+  function clearError(){ errorEl.classList.remove("show"); dotsWrap.classList.remove("shake"); }
   function showError(){
     errorEl.classList.add("show");
     dotsWrap.classList.add("shake");
@@ -852,9 +808,7 @@ function normalize(s){
   return toLatinDigits(String(s)).replace(/\s+/g," ").trim();
 }
 
-function digitsOnly(s){
-  return normalize(s).replace(/[^\d]/g,"");
-}
+function digitsOnly(s){ return normalize(s).replace(/[^\d]/g,""); }
 
 const BAN_WORDS = ["منع"];
 const RENEW_WORDS = ["عايز تجديد","الرخصه منتهيه","غيرت لوحات","تجديد"];
@@ -866,9 +820,7 @@ const LEADING_DATE = /^(\d{1,2})([-\/])(\d{1,2})[-\/](\d{4})/;
      "18-11-2025"  text cells typed by hand      -> day first
      "11/30/2025"  real date cells, which gviz exports in US order -> month first
    Reading a slash date as day-first turns 11/30/2025 into month 30, which JS
-   rolls forward into 2028 and paints an expired permit green. Pick the order
-   from the separator, and fall back to day-first when the numbers rule out
-   month-first. */
+   rolls forward into 2028 and paints an expired permit green. */
 function parseDateParts(s){
   const m = normalize(s).match(LEADING_DATE);
   if(!m) return null;
@@ -884,7 +836,6 @@ function parseDateParts(s){
 
   if(month < 1 || month > 12 || day < 1 || day > 31) return null;
   const d = new Date(year, month-1, day);
-  // Reject impossible dates (e.g. 31-02) instead of letting them roll over.
   if(isNaN(d.getTime()) || d.getMonth() !== month-1 || d.getDate() !== day) return null;
 
   return { date:d, day, month, year, matched:m[0] };
@@ -910,7 +861,6 @@ function splitDateAndNote(v){
 
 function classifyPermit(rawValue){
   const s = normalize(rawValue);
-
   if(s === "") return {kind:"pending", cls:"pb-soon", raw:s};
 
   const noSpaces = s.replace(/\s+/g,"");
@@ -932,7 +882,6 @@ function classifyPermit(rawValue){
   return {kind:"raw", cls:"pb-unclear", raw:s};
 }
 
-/* Returns the main line plus an optional second line for trailing text. */
 function permitDisplay(p){
   if(p.kind === "pending") return { main:t("permitPending"), note:"" };
   if(p.kind === "undetermined") return { main:t("permitUndetermined"), note:"" };
@@ -1051,7 +1000,7 @@ function attachOccurrenceSwitcher(card, chipsContainer, sorted, fieldsHtmlFn){
     content.innerHTML = `
       <div class="permit-banner ${p.cls}">
         <div class="pb-left">
-          <div class="permit-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">${icon}</svg></div>
+          <div class="permit-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">${icon}</svg></div>
           <span class="pb-tag">${disp(t("permitTag"))}</span>
         </div>
         <div class="pb-body">
@@ -1309,11 +1258,7 @@ const submitted = { individuals:"", vehicles:"" };
 function syncPlaceholder(){
   mainInput.placeholder = t(activeTab === "individuals" ? "searchPlaceholderInd" : "searchPlaceholderVeh");
 }
-
-function syncClear(){
-  mainClear.classList.toggle("show", mainInput.value.length > 0);
-}
-
+function syncClear(){ mainClear.classList.toggle("show", mainInput.value.length > 0); }
 function updateSearchMode(){
   document.body.classList.toggle("search-mode", !!normalize(submitted[activeTab]));
 }
@@ -1379,12 +1324,10 @@ function setSystemStatus(state){
 
 function refreshDynamicUI(){
   setSystemStatus(lastSystemState);
-
   [["ind-status","loadErrInd"],["veh-status","loadErrVeh"]].forEach(([id, key])=>{
     const el = document.getElementById(id);
     if(el && el.dataset.errDetail) el.textContent = t(key, el.dataset.errDetail);
   });
-
   if(submitted.individuals) searchIndividuals(submitted.individuals);
   if(submitted.vehicles) searchVehicles(submitted.vehicles);
   updateSearchMode();
