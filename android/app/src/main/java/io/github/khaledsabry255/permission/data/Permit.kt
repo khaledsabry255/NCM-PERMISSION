@@ -49,12 +49,15 @@ object Permit {
         val b = bStr.toInt()
         val year = yStr.toInt()
 
+        // The sheet is normalised to day-first (dd/mm/yyyy). Only read month-first
+        // when day-first is impossible, which is what a legacy US-order export
+        // looks like. `sep` is kept for that older shape.
         val day: Int
         val month: Int
-        if (sep == "-" || a > 12) {
-            day = a; month = b
-        } else {
+        if (b > 12 && a <= 12) {
             month = a; day = b
+        } else {
+            day = a; month = b
         }
 
         if (month !in 1..12 || day !in 1..31) return null

@@ -831,8 +831,11 @@ function parseDateParts(s){
   const year = parseInt(m[4],10);
 
   let day, month;
-  if(sep === "-" || a > 12){ day = a; month = b; }
-  else { month = a; day = b; }
+  // The sheet is normalised to day-first (dd/mm/yyyy). Only read month-first
+  // when day-first is impossible, which is what a legacy US-order export looks
+  // like. `sep` is kept for that older shape.
+  if(b > 12 && a <= 12){ month = a; day = b; }
+  else { day = a; month = b; }
 
   if(month < 1 || month > 12 || day < 1 || day > 31) return null;
   const d = new Date(year, month-1, day);
