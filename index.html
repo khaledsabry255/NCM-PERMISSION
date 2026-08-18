@@ -828,8 +828,14 @@ applyStaticI18n();
 
 <script>
 /* ======================= CONFIG ======================= */
-const INDIVIDUALS_CSV_URL = "https://docs.google.com/spreadsheets/d/18EH8aogUF0qZeLFjku7uiF3e9a_TjCTojRd53qMx0a0/gviz/tq?tqx=out:csv&gid=1465451083";
-const VEHICLES_CSV_URL    = "https://docs.google.com/spreadsheets/d/18EH8aogUF0qZeLFjku7uiF3e9a_TjCTojRd53qMx0a0/gviz/tq?tqx=out:csv&gid=383739446";
+const SHEET_ID = "18EH8aogUF0qZeLFjku7uiF3e9a_TjCTojRd53qMx0a0";
+// Read tabs by NAME, not gid. Importing or replacing a tab changes its gid,
+// and the old gid then silently falls back to the first sheet (individuals) —
+// which is exactly what broke vehicle search. Tab names survive a re-import.
+// (The trailing space in the individuals tab name is part of the real name.)
+const GVIZ_BASE = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&sheet=";
+const INDIVIDUALS_CSV_URL = GVIZ_BASE + encodeURIComponent("تصاريح أفراد ");
+const VEHICLES_CSV_URL    = GVIZ_BASE + encodeURIComponent("تصاريح مركبات");
 
 /* ======================= Helpers ======================= */
 

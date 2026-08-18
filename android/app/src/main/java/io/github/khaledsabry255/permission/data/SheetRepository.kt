@@ -15,11 +15,15 @@ import java.net.URL
 object SheetRepository {
 
     private const val SHEET_ID = "18EH8aogUF0qZeLFjku7uiF3e9a_TjCTojRd53qMx0a0"
-    private const val GID_INDIVIDUALS = "1465451083"
-    private const val GID_VEHICLES = "383739446"
+    private const val SHEET_INDIVIDUALS = "تصاريح أفراد "  // trailing space is part of the tab name
+    private const val SHEET_VEHICLES = "تصاريح مركبات"
 
-    private fun csvUrl(gid: String) =
-        "https://docs.google.com/spreadsheets/d/$SHEET_ID/gviz/tq?tqx=out:csv&gid=$gid"
+    // Read tabs by NAME, not gid: a re-import changes a tab's gid and the old
+    // gid then falls back to the first sheet, which silently broke vehicles.
+    private fun csvUrl(sheetName: String): String {
+        val enc = java.net.URLEncoder.encode(sheetName, "UTF-8").replace("+", "%20")
+        return "https://docs.google.com/spreadsheets/d/$SHEET_ID/gviz/tq?tqx=out:csv&sheet=$enc"
+    }
 
     // Fixed column order in "تصاريح أفراد" — read by index, not by header name.
     private const val IND_NAME = 2
@@ -39,8 +43,8 @@ object SheetRepository {
     private const val VEH_DAY = 6
 
     suspend fun load(): SheetData = withContext(Dispatchers.IO) {
-        val people = parsePeople(fetch(csvUrl(GID_INDIVIDUALS)))
-        val vehicles = parseVehicles(fetch(csvUrl(GID_VEHICLES)))
+        val people = parsePeople(fetch(csvUrl(SHEET_INDIVIDUALS)))
+        val vehicles = parseVehicles(fetch(csvUrl(SHEET_VEHICLES)))
         SheetData(people, vehicles)
     }
 
