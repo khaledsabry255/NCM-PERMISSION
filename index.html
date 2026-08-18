@@ -82,7 +82,7 @@ body{
      right edge — held with an explicit LTR so it never flips with language. */
   direction:ltr;
 }
-.tabsrow .tabs{ flex:1; margin:0; align-self:stretch; }
+.tabsrow .tabs{ flex:1; margin:0; align-self:stretch; flex-direction:row-reverse; }
 
 /* Row 2: the search field with a Search button beside it */
 .searchrow{
@@ -169,13 +169,13 @@ body{
   flex-shrink:0;
   width:44px; height:44px;
   display:flex; align-items:center; justify-content:center;
-  border:1px solid var(--line);
+  border:1px solid var(--ok-br);
   border-radius:9px;
-  background:var(--field);
-  color:var(--blue);
+  background:var(--ok-bg);
+  color:var(--ok);
   cursor:pointer; padding:0;
 }
-.refresh-btn:active{ background:var(--tint); }
+.refresh-btn:active{ filter:brightness(0.96); }
 .refresh-btn.spinning svg{ animation:spin .8s linear infinite; }
 
 /* Lock-screen language toggle, pinned to a corner */
