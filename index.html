@@ -668,6 +668,8 @@ const I18N = {
     fieldNotes:"ملاحظات",
     fieldType:"النوع",
     fieldOwner:"تابعه",
+    fieldMailType:"نوع الإرسال",
+    fieldLetter:"رقم الخطاب",
     permitPending:"في انتظار الرد",
     permitUndetermined:"غير محدد موقفه حتى الآن",
     loadErrInd:d=>`حصل خطأ في تحميل بيانات الأفراد (${d}). اتأكد إن فيه اتصال بالإنترنت وجرّب تاني.`,
@@ -707,6 +709,8 @@ const I18N = {
     fieldNotes:"Notes",
     fieldType:"Type",
     fieldOwner:"Belongs to",
+    fieldMailType:"Mail type",
+    fieldLetter:"Letter number",
     permitPending:"Awaiting response",
     permitUndetermined:"Status not yet determined",
     loadErrInd:d=>`Failed to load the individuals data (${d}). Check your internet connection and try again.`,
@@ -830,7 +834,7 @@ applyStaticI18n();
 
 <script>
 /* ======================= CONFIG ======================= */
-const SHEET_ID = "18EH8aogUF0qZeLFjku7uiF3e9a_TjCTojRd53qMx0a0";
+const SHEET_ID = "1ZceJtmQMpW7Ky3Ysgz0mDcmE6Uxr600OuO2KOMHJnWE";
 // Read tabs by NAME, not gid. Importing or replacing a tab changes its gid,
 // and the old gid then silently falls back to the first sheet (individuals) —
 // which is exactly what broke vehicle search. Tab names survive a re-import.
@@ -975,7 +979,7 @@ function dispNum(str){ return `<span class="num">${disp(str)}</span>`; }
 let individualsGroups = null;
 
 // Fixed column order in "تصاريح أفراد": م, م, الاسم, الوظيفة, الرقم القومى, العنوان, ملاحظات, المرسل, تصريح, Mali Day
-const IND_COL = { NAME:2, JOB:3, ID:4, ADDR:5, NOTE:6, SENDER:7, PERMIT:8, DAY:9 };
+const IND_COL = { NAME:2, JOB:3, ID:4, ADDR:5, NOTE:6, SENDER:7, PERMIT:8, DAY:9, MAIL_TYPE:10, LETTER:11 };
 
 async function initIndividuals(){
   const statusEl = document.getElementById("ind-status");
@@ -1000,6 +1004,8 @@ async function initIndividuals(){
         address: normalize(cols[IND_COL.ADDR]),
         note: normalize(cols[IND_COL.NOTE]),
         sender: normalize(cols[IND_COL.SENDER]),
+        mailType: normalize(cols[IND_COL.MAIL_TYPE]),
+        letterNumber: normalize(cols[IND_COL.LETTER]),
         permit: cols[IND_COL.PERMIT],
         day: cols[IND_COL.DAY],
         dayParsed: parseDateLoose(cols[IND_COL.DAY])
@@ -1169,6 +1175,8 @@ function searchIndividuals(query){
       <div class="record-row"><span class="k">${disp(t("fieldAddress"))}</span><span class="v">${disp(rec.address || "—")}</span></div>
       <div class="record-row"><span class="k">${disp(t("fieldSender"))}</span><span class="v">${disp(rec.sender || "—")}</span></div>
       <div class="record-row"><span class="k">${disp(t("fieldNotes"))}</span><span class="v">${disp(rec.note || "—")}</span></div>
+      ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
+      ${rec.letterNumber ? `<div class="record-row"><span class="k">${disp(t("fieldLetter"))}</span><span class="v">${dispNum(rec.letterNumber)}</span></div>` : ""}
     `);
 
     resultsEl.appendChild(card);
@@ -1180,7 +1188,7 @@ function searchIndividuals(query){
 let vehiclesGroups = null;
 
 // Fixed column order in "تصاريح مركبات": م, م, رقم السيارة, النوع, تابعه, تصريح, Mail Day
-const VEH_COL = { PLATE:2, TYPE:3, OWNER:4, PERMIT:5, DAY:6 };
+const VEH_COL = { PLATE:2, TYPE:3, OWNER:4, PERMIT:5, DAY:6, MAIL_TYPE:7 };
 
 async function initVehicles(){
   const statusEl = document.getElementById("veh-status");
@@ -1201,6 +1209,7 @@ async function initVehicles(){
       vehiclesGroups.get(key).records.push({
         type: normalize(cols[VEH_COL.TYPE]),
         owner: normalize(cols[VEH_COL.OWNER]),
+        mailType: normalize(cols[VEH_COL.MAIL_TYPE]),
         permit: cols[VEH_COL.PERMIT],
         day: cols[VEH_COL.DAY],
         dayParsed: parseDateLoose(cols[VEH_COL.DAY])
@@ -1239,6 +1248,7 @@ function renderVehicleCard(g, resultsEl){
   attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, rec => `
     <div class="record-row"><span class="k">${disp(t("fieldType"))}</span><span class="v">${disp(rec.type || "—")}</span></div>
     <div class="record-row"><span class="k">${disp(t("fieldOwner"))}</span><span class="v">${disp(rec.owner || "—")}</span></div>
+    ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
   `);
 
   resultsEl.appendChild(card);

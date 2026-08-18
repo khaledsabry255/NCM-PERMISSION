@@ -14,7 +14,7 @@ import java.net.URL
  */
 object SheetRepository {
 
-    private const val SHEET_ID = "18EH8aogUF0qZeLFjku7uiF3e9a_TjCTojRd53qMx0a0"
+    private const val SHEET_ID = "1ZceJtmQMpW7Ky3Ysgz0mDcmE6Uxr600OuO2KOMHJnWE"
     private const val SHEET_INDIVIDUALS = "تصاريح أفراد "  // trailing space is part of the tab name
     private const val SHEET_VEHICLES = "تصاريح مركبات"
 
