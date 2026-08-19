@@ -743,6 +743,25 @@ function t(key, arg){
   return entry !== undefined ? entry : key;
 }
 
+/* Arabic names for the ASE DATA columns, keyed on the header text in the sheet
+   (matched case-insensitively). A header with no entry here shows as written,
+   so a newly added column still appears — just untranslated until listed. */
+const ASE_LABEL_AR = {
+  "letter number": "رقم الخطاب",
+  "company name": "اسم الشركة",
+  "letter date": "تاريخ الخطاب",
+  "note": "ملاحظة",
+  "notes": "ملاحظات",
+  "mail type": "نوع الإرسال",
+  "source": "المصدر",
+  "national id": "الرقم القومى"
+};
+
+function aseLabel(header){
+  if(LANG === "en") return header;
+  return ASE_LABEL_AR[String(header).trim().toLowerCase()] || header;
+}
+
 const PERMIT_PHRASE_EN = [
   ["الرخصه منتهيه","License expired"],
   ["الرخصة منتهية","License expired"],
@@ -1126,7 +1145,7 @@ function aseBlockHtml(rec){
     const v = vals[i];
     if(!v) return "";
     const shown = /^[0-9]/.test(v) ? dispNum(v) : disp(v);
-    return `<div class="record-row"><span class="k">${disp(col.label)}</span><span class="v">${shown}</span></div>`;
+    return `<div class="record-row"><span class="k">${disp(aseLabel(col.label))}</span><span class="v">${shown}</span></div>`;
   }).join("");
   if(!rows) return "";
   return `<div class="rows-group-title">ASE DATA</div><div class="record-rows">${rows}</div>`;

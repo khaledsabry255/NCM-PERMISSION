@@ -56,7 +56,7 @@ fun PersonCard(
             // Label/value pairs for the ASE DATA block, dropping empty cells.
             extraGroup = aseColumns.mapIndexedNotNull { i, label ->
                 val v = rec.ase.getOrNull(i).orEmpty()
-                if (v.isEmpty()) null else label to v
+                if (v.isEmpty()) null else aseLabel(label, lang) to v
             }
         )
     }

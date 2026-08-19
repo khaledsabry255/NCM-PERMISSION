@@ -61,6 +61,24 @@ data class Strings(
  * phrases are mapped; anything unrecognised (dates, free text) is shown exactly
  * as written. Longest/most specific phrases come first.
  */
+/* Arabic names for the ASE DATA columns, keyed on the header text in the sheet
+   (matched case-insensitively). A header with no entry here shows as written,
+   so a newly added column still appears — just untranslated until listed. */
+private val ASE_LABEL_AR = mapOf(
+    "letter number" to "رقم الخطاب",
+    "company name" to "اسم الشركة",
+    "letter date" to "تاريخ الخطاب",
+    "note" to "ملاحظة",
+    "notes" to "ملاحظات",
+    "mail type" to "نوع الإرسال",
+    "source" to "المصدر",
+    "national id" to "الرقم القومى"
+)
+
+fun aseLabel(header: String, lang: Lang): String =
+    if (lang == Lang.EN) header
+    else ASE_LABEL_AR[header.trim().lowercase()] ?: header
+
 private val PERMIT_PHRASE_EN = listOf(
     "الرخصه منتهيه" to "License expired",
     "الرخصة منتهية" to "License expired",
