@@ -323,6 +323,8 @@ body.search-mode .tabs{ margin:10px 0; }
   justify-content:space-between;
   gap:10px;
   margin-bottom:11px;
+  /* Chips left, count badge right, regardless of interface language. */
+  direction:ltr;
 }
 .record-identity{ min-width:0; padding-bottom:13px; border-bottom:1px solid var(--line-soft); }
 .record-name{
@@ -361,7 +363,7 @@ body.search-mode .tabs{ margin:10px 0; }
   flex-shrink:0;
 }
 
-.occ-selector{ display:flex; gap:5px; overflow-x:auto; }
+.occ-selector{ display:flex; gap:5px; overflow-x:auto; direction:ltr; }
 .occ-chip{
   flex-shrink:0;
   min-width:30px;
@@ -423,7 +425,7 @@ body.search-mode .tabs{ margin:10px 0; }
   white-space:nowrap;
   flex-shrink:0;
 }
-.record-row .v{ color:var(--ink); font-weight:700; flex:1; unicode-bidi:plaintext; text-align:start; }
+.record-row .v{ color:var(--ink); font-weight:700; flex:1; unicode-bidi:plaintext; text-align:left; }
 
 /* ---- Permit status banner ---- */
 .permit-banner{
