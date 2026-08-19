@@ -52,6 +52,9 @@
   --row-bg:rgba(255,255,255,.82);
   --row-line:#c7d3e0;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
+  /* Light blue shared by the send-date and ASE DATA boxes */
+  --sky:#CFE3F7;
+  --sky-line:#9CC4E8;
 }
 
 *{box-sizing:border-box;}
@@ -350,27 +353,27 @@ body.search-mode .tabs{ margin:10px 0; }
 .record-identity{ min-width:0; padding-bottom:13px; border-bottom:1px solid var(--line-soft); }
 .record-name{
   font-family:'Tajawal',sans-serif;
-  font-weight:800;
-  font-size:19px;
+  font-weight:900;
+  font-size:21px;
   color:var(--ink);
   line-height:1.35;
   text-align:center;
-  background:var(--tint);
+  background:#ffffff;
   border:1px solid var(--edge);
   border-radius:11px;
-  padding:12px 10px;
+  padding:13px 10px;
   margin-bottom:8px;
 }
 .record-subid{
   text-align:center;
-  font-weight:700;
-  font-size:15px;
+  font-weight:800;
+  font-size:17px;
   letter-spacing:.4px;
   color:var(--ink);
-  background:var(--card);
+  background:#ffffff;
   border:1px solid var(--edge);
   border-radius:11px;
-  padding:10px;
+  padding:11px;
 }
 .count-badge{
   background:var(--field);
@@ -408,12 +411,12 @@ body.search-mode .tabs{ margin:10px 0; }
 /* Same treatment as the send-date box, one size down */
 .rows-group-title{
   text-align:center;
-  background:var(--tint);
-  border:1px solid var(--line);
+  background:var(--sky);
+  border:1px solid var(--sky-line);
   border-radius:9px;
-  padding:7px 10px;
+  padding:8px 10px;
   margin:12px 0 8px;
-  font-size:11px;
+  font-size:12.5px;
   font-weight:800;
   letter-spacing:1.2px;
   color:var(--ink);
@@ -433,19 +436,19 @@ body.search-mode .tabs{ margin:10px 0; }
   border-radius:10px;
   background:var(--row-bg);
   border:1px solid var(--row-line);
-  font-size:13.5px;
+  font-size:15px;
   /* Fixed order — label right, value left — so the pair never swaps sides
      when the interface language changes. */
   direction:rtl;
 }
 .record-row .k{
   color:var(--ink-2);
-  font-weight:600;
-  font-size:12px;
+  font-weight:800;
+  font-size:13.5px;
   white-space:nowrap;
   flex-shrink:0;
 }
-.record-row .v{ color:var(--ink); font-weight:700; flex:1; unicode-bidi:plaintext; text-align:left; }
+.record-row .v{ color:var(--ink); font-weight:800; flex:1; unicode-bidi:plaintext; text-align:left; }
 
 /* ---- Permit status banner ---- */
 .permit-banner{
@@ -470,9 +473,9 @@ body.search-mode .tabs{ margin:10px 0; }
   flex-shrink:0;
   color:#fff;
 }
-.permit-banner .pb-tag{ font-size:10.5px; font-weight:700; }
+.permit-banner .pb-tag{ font-size:12px; font-weight:800; }
 .pb-body{ text-align:end; min-width:0; }
-.permit-banner .pb-value{ font-size:15.5px; font-weight:800; unicode-bidi:plaintext; }
+.permit-banner .pb-value{ font-size:17px; font-weight:800; unicode-bidi:plaintext; }
 .permit-banner .pb-extra{ font-size:11px; font-weight:600; opacity:.8; margin-top:3px; }
 
 .pb-ok{ background:var(--ok-bg); border-color:var(--ok-br); color:var(--ok); }
@@ -488,15 +491,15 @@ body.search-mode .tabs{ margin:10px 0; }
 
 .occ-date-box{
   text-align:center;
-  background:var(--tint);
-  border:1px solid var(--line);
+  background:var(--sky);
+  border:1px solid var(--sky-line);
   border-radius:11px;
-  padding:11px 10px;
+  padding:12px 10px;
   margin-bottom:12px;
 }
-.occ-date-box .odb-label{ font-weight:700; font-size:13px; color:var(--ink); }
-.occ-date-box .odb-value{ font-size:13px; color:var(--ink); font-weight:800; margin-top:4px; }
-.occ-date-box .odb-extra{ font-size:11px; color:var(--ink-2); margin-top:3px; }
+.occ-date-box .odb-label{ font-weight:800; font-size:14.5px; color:var(--ink); }
+.occ-date-box .odb-value{ font-size:15px; color:var(--ink); font-weight:800; margin-top:4px; }
+.occ-date-box .odb-extra{ font-size:12.5px; color:var(--ink-2); font-weight:700; margin-top:3px; }
 
 footer{
   text-align:center;
