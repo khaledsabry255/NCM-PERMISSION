@@ -376,9 +376,9 @@ body.search-mode .tabs{ margin:10px 0; }
   padding:11px;
 }
 .count-badge{
-  background:var(--soon-bg);
-  border:1px solid var(--soon-br);
-  color:var(--soon);
+  background:#F7C58A;
+  border:1px solid #D98B2B;
+  color:#8A4E04;
   font-size:12px;
   font-weight:800;
   padding:5px 11px;
@@ -1139,12 +1139,8 @@ function attachOccurrenceSwitcher(card, chipsContainer, sorted, fieldsHtmlFn){
           ${shown.note ? `<div class="pb-extra">${disp(shown.note)}</div>` : ""}
         </div>
       </div>
-      <div class="occ-date-box">
-        <div class="odb-label">${disp(t("sendDate"))}</div>
-        <div class="odb-value">${sentMain}</div>
-        ${sentNote ? `<div class="odb-extra">${disp(sentNote)}</div>` : ""}
-      </div>
-      ${fieldsHtmlFn(rec)}
+      <div class="rows-group-title">NCM DATA</div>
+      ${fieldsHtmlFn(rec, { sendMain: sentMain, sendNote: sentNote })}
     `;
   }
 
@@ -1258,8 +1254,9 @@ function searchIndividuals(query){
     `;
     card.appendChild(head);
 
-    attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, rec => `
+    attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, (rec, sent) => `
       <div class="record-rows">
+        <div class="record-row"><span class="k">${disp(t("sendDate"))}</span><span class="v">${sent.sendMain}${sent.sendNote ? " " + disp(sent.sendNote) : ""}</span></div>
         <div class="record-row"><span class="k">${disp(t("fieldJob"))}</span><span class="v">${disp(rec.job || "—")}</span></div>
         <div class="record-row"><span class="k">${disp(t("fieldAddress"))}</span><span class="v">${disp(rec.address || "—")}</span></div>
         <div class="record-row"><span class="k">${disp(t("fieldSender"))}</span><span class="v">${disp(rec.sender || "—")}</span></div>
@@ -1335,8 +1332,9 @@ function renderVehicleCard(g, resultsEl){
   `;
   card.appendChild(head);
 
-  attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, rec => `
+  attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, (rec, sent) => `
     <div class="record-rows">
+      <div class="record-row"><span class="k">${disp(t("sendDate"))}</span><span class="v">${sent.sendMain}${sent.sendNote ? " " + disp(sent.sendNote) : ""}</span></div>
       <div class="record-row"><span class="k">${disp(t("fieldType"))}</span><span class="v">${disp(rec.type || "—")}</span></div>
       <div class="record-row"><span class="k">${disp(t("fieldOwner"))}</span><span class="v">${disp(rec.owner || "—")}</span></div>
       ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
