@@ -27,7 +27,12 @@ import androidx.compose.ui.unit.sp
 import io.github.khaledsabry255.permission.data.*
 
 @Composable
-fun PersonCard(group: PersonGroup, strings: Strings, lang: Lang) {
+fun PersonCard(
+    group: PersonGroup,
+    strings: Strings,
+    lang: Lang,
+    aseColumns: List<String> = emptyList()
+) {
     RecordCard(
         count = group.records.size,
         title = group.name.ifEmpty { strings.noName },
@@ -41,12 +46,18 @@ fun PersonCard(group: PersonGroup, strings: Strings, lang: Lang) {
             day = rec.day,
             strings = strings,
             lang = lang,
-            fields = listOf(
-                strings.fieldJob to rec.job,
-                strings.fieldAddress to rec.address,
-                strings.fieldSender to rec.sender,
-                strings.fieldNotes to rec.note
-            )
+            fields = buildList {
+                add(strings.fieldJob to rec.job)
+                add(strings.fieldAddress to rec.address)
+                add(strings.fieldSender to rec.sender)
+                add(strings.fieldNotes to rec.note)
+                if (rec.mailType.isNotEmpty()) add(strings.fieldMailType to rec.mailType)
+            },
+            // Label/value pairs for the ASE DATA block, dropping empty cells.
+            extraGroup = aseColumns.mapIndexedNotNull { i, label ->
+                val v = rec.ase.getOrNull(i).orEmpty()
+                if (v.isEmpty()) null else label to v
+            }
         )
     }
 }
@@ -66,10 +77,11 @@ fun VehicleCard(group: VehicleGroup, strings: Strings, lang: Lang) {
             day = rec.day,
             strings = strings,
             lang = lang,
-            fields = listOf(
-                strings.fieldType to rec.type,
-                strings.fieldOwner to rec.owner
-            )
+            fields = buildList {
+                add(strings.fieldType to rec.type)
+                add(strings.fieldOwner to rec.owner)
+                if (rec.mailType.isNotEmpty()) add(strings.fieldMailType to rec.mailType)
+            }
         )
     }
 }
@@ -178,13 +190,42 @@ private fun OccurrenceBody(
     day: String,
     strings: Strings,
     lang: Lang,
-    fields: List<Pair<String, String>>
+    fields: List<Pair<String, String>>,
+    extraGroup: List<Pair<String, String>> = emptyList()
 ) {
     PermitBanner(status, strings, lang)
     Spacer(Modifier.height(14.dp))
     DateBox(strings.sendDate, day.ifEmpty { strings.notSpecified })
     Spacer(Modifier.height(14.dp))
     FieldRows(fields)
+    if (extraGroup.isNotEmpty()) {
+        Spacer(Modifier.height(12.dp))
+        GroupHeading("ASE DATA")
+        Spacer(Modifier.height(8.dp))
+        FieldRows(extraGroup)
+    }
+}
+
+/** Same treatment as the send-date box, one size down. */
+@Composable
+private fun GroupHeading(text: String) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(9.dp))
+            .background(Palette.Glass)
+            .border(BorderStroke(1.dp, Palette.GlassBorder), RoundedCornerShape(9.dp))
+            .padding(vertical = 7.dp, horizontal = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text,
+            color = Palette.TextMain,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.2.sp
+        )
+    }
 }
 
 @Composable

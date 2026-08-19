@@ -109,7 +109,7 @@ fun SearchScreen(strings: Strings, lang: Lang) {
                 is LoadState.Failed -> ErrorState(strings, s.detail) { attempt++ }
                 is LoadState.Ready -> {
                     if (tab == 0) {
-                        IndividualResults(s.data.people, indSubmitted, strings, lang)
+                        IndividualResults(s.data.people, indSubmitted, strings, lang, s.data.aseColumns)
                     } else {
                         VehicleResults(s.data.vehicles, vehSubmitted, strings, lang)
                     }
@@ -124,7 +124,8 @@ private fun IndividualResults(
     all: List<PersonGroup>,
     query: String,
     strings: Strings,
-    lang: Lang
+    lang: Lang,
+    aseColumns: List<String> = emptyList()
 ) {
     if (query.isBlank()) {
         HintState(strings.hintInd) { drawPersonIcon(it) }
@@ -148,7 +149,7 @@ private fun IndividualResults(
             item { StatusLine(strings.truncatedName, showSpinner = false) }
         }
         items(results.groups, key = { it.nationalId + "|" + it.name }) { group ->
-            PersonCard(group, strings, lang)
+            PersonCard(group, strings, lang, aseColumns)
         }
     }
 }

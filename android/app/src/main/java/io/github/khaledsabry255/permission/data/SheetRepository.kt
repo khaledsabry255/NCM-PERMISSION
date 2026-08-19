@@ -34,6 +34,11 @@ object SheetRepository {
     private const val IND_SENDER = 7
     private const val IND_PERMIT = 8
     private const val IND_DAY = 9
+    private const val IND_MAIL_TYPE = 10
+
+    // Everything from this column to the last one is the ASE DATA block; the
+    // labels come from the sheet header so added columns need no code change.
+    private const val IND_ASE_START = 11
 
     // Fixed column order in "تصاريح مركبات".
     private const val VEH_PLATE = 2
@@ -41,11 +46,14 @@ object SheetRepository {
     private const val VEH_OWNER = 4
     private const val VEH_PERMIT = 5
     private const val VEH_DAY = 6
+    private const val VEH_MAIL_TYPE = 7
 
     suspend fun load(): SheetData = withContext(Dispatchers.IO) {
-        val people = parsePeople(fetch(csvUrl(SHEET_INDIVIDUALS)))
+        val individualsCsv = fetch(csvUrl(SHEET_INDIVIDUALS))
+        val aseColumns = aseHeaderLabels(individualsCsv)
+        val people = parsePeople(individualsCsv, aseColumns.size)
         val vehicles = parseVehicles(fetch(csvUrl(SHEET_VEHICLES)))
-        SheetData(people, vehicles)
+        SheetData(people, vehicles, aseColumns)
     }
 
     private fun fetch(urlStr: String): String {
@@ -82,7 +90,18 @@ object SheetRepository {
     private fun rawCell(cols: List<String>, i: Int): String =
         if (i < cols.size) cols[i] else ""
 
-    private fun parsePeople(csv: String): List<PersonGroup> {
+    /** Header labels from IND_ASE_START to the last non-blank column. */
+    private fun aseHeaderLabels(csv: String): List<String> {
+        val header = Csv.parse(csv).firstOrNull() ?: return emptyList()
+        val out = mutableListOf<String>()
+        for (c in IND_ASE_START until header.size) {
+            val label = Permit.normalize(header[c])
+            if (label.isNotEmpty()) out.add(label)
+        }
+        return out
+    }
+
+    private fun parsePeople(csv: String, aseCount: Int): List<PersonGroup> {
         val rows = Csv.parse(csv).drop(1) // skip header row
         val grouped = LinkedHashMap<String, MutableList<PersonRecord>>()
         val identity = LinkedHashMap<String, Pair<String, String>>() // key -> (name, id)
@@ -101,6 +120,8 @@ object SheetRepository {
                     address = cell(cols, IND_ADDR),
                     note = cell(cols, IND_NOTE),
                     sender = cell(cols, IND_SENDER),
+                    mailType = cell(cols, IND_MAIL_TYPE),
+                    ase = (0 until aseCount).map { cell(cols, IND_ASE_START + it) },
                     permitRaw = rawCell(cols, IND_PERMIT),
                     day = cell(cols, IND_DAY),
                     dayMillis = Permit.parseDate(rawCell(cols, IND_DAY))
@@ -130,6 +151,7 @@ object SheetRepository {
                 VehicleRecord(
                     type = cell(cols, VEH_TYPE),
                     owner = cell(cols, VEH_OWNER),
+                    mailType = cell(cols, VEH_MAIL_TYPE),
                     permitRaw = rawCell(cols, VEH_PERMIT),
                     day = cell(cols, VEH_DAY),
                     dayMillis = Permit.parseDate(rawCell(cols, VEH_DAY))

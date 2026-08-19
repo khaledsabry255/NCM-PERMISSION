@@ -381,6 +381,21 @@ body.search-mode .tabs{ margin:10px 0; }
 
 .occ-content{ padding:13px 15px 15px; }
 
+/* Heading for the ASE DATA block inside a record card */
+/* Same treatment as the send-date box, one size down */
+.rows-group-title{
+  text-align:center;
+  background:var(--tint);
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:7px 10px;
+  margin:12px 0 8px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:1.2px;
+  color:var(--ink);
+}
+
 .record-rows{
   display:flex;
   flex-direction:column;
@@ -669,7 +684,6 @@ const I18N = {
     fieldType:"النوع",
     fieldOwner:"تابعه",
     fieldMailType:"نوع الإرسال",
-    fieldLetter:"رقم الخطاب",
     permitPending:"في انتظار الرد",
     permitUndetermined:"غير محدد موقفه حتى الآن",
     loadErrInd:d=>`حصل خطأ في تحميل بيانات الأفراد (${d}). اتأكد إن فيه اتصال بالإنترنت وجرّب تاني.`,
@@ -710,7 +724,6 @@ const I18N = {
     fieldType:"Type",
     fieldOwner:"Belongs to",
     fieldMailType:"Mail type",
-    fieldLetter:"Letter number",
     permitPending:"Awaiting response",
     permitUndetermined:"Status not yet determined",
     loadErrInd:d=>`Failed to load the individuals data (${d}). Check your internet connection and try again.`,
@@ -977,6 +990,8 @@ function dispNum(str){ return `<span class="num">${disp(str)}</span>`; }
 /* ======================= Individuals ======================= */
 
 let individualsGroups = null;
+// [{index, label}] describing the ASE DATA columns, filled from the sheet header.
+let indAseColumns = [];
 
 // Fixed column order in "تصاريح أفراد": م, م, الاسم, الوظيفة, الرقم القومى, العنوان, ملاحظات, المرسل, تصريح, Mali Day
 const IND_COL = { NAME:2, JOB:3, ID:4, ADDR:5, NOTE:6, SENDER:7, PERMIT:8, DAY:9, MAIL_TYPE:10, LETTER:11 };
@@ -985,7 +1000,17 @@ async function initIndividuals(){
   const statusEl = document.getElementById("ind-status");
   try{
     const rows = await loadCSVRaw(INDIVIDUALS_CSV_URL);
+    const headerRow = rows[0] || [];
     const dataRows = rows.slice(1);
+
+    // Everything from "Letter Number" to the last column belongs to ASE DATA.
+    // Labels come from the sheet header, so columns added later appear on their
+    // own without a code change.
+    indAseColumns = [];
+    for(let c = IND_COL.LETTER; c < headerRow.length; c++){
+      const label = normalize(headerRow[c]);
+      if(label) indAseColumns.push({ index:c, label });
+    }
 
     individualsGroups = new Map();
 
@@ -1005,7 +1030,7 @@ async function initIndividuals(){
         note: normalize(cols[IND_COL.NOTE]),
         sender: normalize(cols[IND_COL.SENDER]),
         mailType: normalize(cols[IND_COL.MAIL_TYPE]),
-        letterNumber: normalize(cols[IND_COL.LETTER]),
+        ase: indAseColumns.map(col => normalize(cols[col.index])),
         permit: cols[IND_COL.PERMIT],
         day: cols[IND_COL.DAY],
         dayParsed: parseDateLoose(cols[IND_COL.DAY])
@@ -1070,7 +1095,7 @@ function attachOccurrenceSwitcher(card, chipsContainer, sorted, fieldsHtmlFn){
         <div class="odb-value">${sentMain}</div>
         ${sentNote ? `<div class="odb-extra">${disp(sentNote)}</div>` : ""}
       </div>
-      <div class="record-rows">${fieldsHtmlFn(rec)}</div>
+      ${fieldsHtmlFn(rec)}
     `;
   }
 
@@ -1091,6 +1116,20 @@ function attachOccurrenceSwitcher(card, chipsContainer, sorted, fieldsHtmlFn){
 
   renderContent(defaultIdx);
   card.appendChild(content);
+}
+
+/* The ASE DATA block: its own heading plus one row per sheet column, rendered
+   only when at least one of those cells has a value. */
+function aseBlockHtml(rec){
+  const vals = rec.ase || [];
+  const rows = indAseColumns.map((col, i) => {
+    const v = vals[i];
+    if(!v) return "";
+    const shown = /^[0-9]/.test(v) ? dispNum(v) : disp(v);
+    return `<div class="record-row"><span class="k">${disp(col.label)}</span><span class="v">${shown}</span></div>`;
+  }).join("");
+  if(!rows) return "";
+  return `<div class="rows-group-title">ASE DATA</div><div class="record-rows">${rows}</div>`;
 }
 
 function sortByDay(records){
@@ -1171,12 +1210,14 @@ function searchIndividuals(query){
     card.appendChild(head);
 
     attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, rec => `
-      <div class="record-row"><span class="k">${disp(t("fieldJob"))}</span><span class="v">${disp(rec.job || "—")}</span></div>
-      <div class="record-row"><span class="k">${disp(t("fieldAddress"))}</span><span class="v">${disp(rec.address || "—")}</span></div>
-      <div class="record-row"><span class="k">${disp(t("fieldSender"))}</span><span class="v">${disp(rec.sender || "—")}</span></div>
-      <div class="record-row"><span class="k">${disp(t("fieldNotes"))}</span><span class="v">${disp(rec.note || "—")}</span></div>
-      ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
-      ${rec.letterNumber ? `<div class="record-row"><span class="k">${disp(t("fieldLetter"))}</span><span class="v">${dispNum(rec.letterNumber)}</span></div>` : ""}
+      <div class="record-rows">
+        <div class="record-row"><span class="k">${disp(t("fieldJob"))}</span><span class="v">${disp(rec.job || "—")}</span></div>
+        <div class="record-row"><span class="k">${disp(t("fieldAddress"))}</span><span class="v">${disp(rec.address || "—")}</span></div>
+        <div class="record-row"><span class="k">${disp(t("fieldSender"))}</span><span class="v">${disp(rec.sender || "—")}</span></div>
+        <div class="record-row"><span class="k">${disp(t("fieldNotes"))}</span><span class="v">${disp(rec.note || "—")}</span></div>
+        ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
+      </div>
+      ${aseBlockHtml(rec)}
     `);
 
     resultsEl.appendChild(card);
@@ -1246,9 +1287,11 @@ function renderVehicleCard(g, resultsEl){
   card.appendChild(head);
 
   attachOccurrenceSwitcher(card, head.querySelector(".occ-selector"), sorted, rec => `
-    <div class="record-row"><span class="k">${disp(t("fieldType"))}</span><span class="v">${disp(rec.type || "—")}</span></div>
-    <div class="record-row"><span class="k">${disp(t("fieldOwner"))}</span><span class="v">${disp(rec.owner || "—")}</span></div>
-    ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
+    <div class="record-rows">
+      <div class="record-row"><span class="k">${disp(t("fieldType"))}</span><span class="v">${disp(rec.type || "—")}</span></div>
+      <div class="record-row"><span class="k">${disp(t("fieldOwner"))}</span><span class="v">${disp(rec.owner || "—")}</span></div>
+      ${rec.mailType ? `<div class="record-row"><span class="k">${disp(t("fieldMailType"))}</span><span class="v">${disp(rec.mailType)}</span></div>` : ""}
+    </div>
   `);
 
   resultsEl.appendChild(card);

@@ -5,6 +5,9 @@ data class PersonRecord(
     val address: String,
     val note: String,
     val sender: String,
+    val mailType: String,
+    /** Values for the ASE DATA block, aligned with [SheetData.aseColumns]. */
+    val ase: List<String>,
     val permitRaw: String,
     val day: String,
     val dayMillis: Long?
@@ -19,6 +22,7 @@ data class PersonGroup(
 data class VehicleRecord(
     val type: String,
     val owner: String,
+    val mailType: String,
     val permitRaw: String,
     val day: String,
     val dayMillis: Long?
@@ -31,5 +35,7 @@ data class VehicleGroup(
 
 data class SheetData(
     val people: List<PersonGroup>,
-    val vehicles: List<VehicleGroup>
+    val vehicles: List<VehicleGroup>,
+    /** Header labels for the ASE DATA columns, in sheet order. */
+    val aseColumns: List<String> = emptyList()
 )
