@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.AbsoluteAlignment
@@ -31,13 +31,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var lang by rememberSaveable { mutableStateOf(prefs.lang) }
-            var unlocked by rememberSaveable { mutableStateOf(prefs.isUnlocked()) }
+            // The stored flag is the source of truth: a saved-state snapshot can
+            // outlive it and disagree after the process is recreated.
+            var unlocked by remember { mutableStateOf(prefs.isUnlocked()) }
 
             val strings = stringsFor(lang)
             val direction = if (lang == Lang.AR) LayoutDirection.Rtl else LayoutDirection.Ltr
 
             MaterialTheme(
-                colorScheme = darkColorScheme(
+                colorScheme = lightColorScheme(
                     primary = Palette.Gold,
                     background = Palette.BgDeep,
                     surface = Palette.BgDeep,
