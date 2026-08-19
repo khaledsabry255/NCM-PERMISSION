@@ -261,20 +261,19 @@ body.search-mode .app-header{ display:none; }
 /* ---- Tabs ---- */
 .tabs{
   display:flex;
-  gap:4px;
-  background:var(--field);
-  border:1px solid var(--line);
-  border-radius:11px;
-  padding:3px;
+  gap:8px;
+  background:transparent;
+  border:none;
+  padding:0;
   margin:12px 0;
 }
 body.search-mode .tabs{ margin:10px 0; }
 .tab-btn{
   flex:1;
-  border:none;
-  border-radius:8px;
-  padding:9px 10px;
-  background:transparent;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px;
+  background:var(--card);
   color:var(--ink-2);
   font-family:inherit;
   font-size:13px;
@@ -286,7 +285,7 @@ body.search-mode .tabs{ margin:10px 0; }
   justify-content:center;
   gap:7px;
 }
-.tab-btn.active{ background:#FFD24D; color:#0B1114; }
+.tab-btn.active{ background:#FFD24D; border-color:#E0A800; color:#0B1114; }
 
 .status-line{
   text-align:center;
