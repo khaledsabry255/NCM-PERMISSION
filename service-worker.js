@@ -1,4 +1,4 @@
-const CACHE_NAME = "ncm-permits-cache-v27";
+const CACHE_NAME = "ncm-permits-cache-v28";
 const CORE_ASSETS = [
   "./index.html",
   "./manifest.json",
