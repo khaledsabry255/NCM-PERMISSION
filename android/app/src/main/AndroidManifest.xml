@@ -9,11 +9,14 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:hardwareAccelerated="true"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NCMPermission">
+        android:theme="@style/Theme.NCMPermission"
+        android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"

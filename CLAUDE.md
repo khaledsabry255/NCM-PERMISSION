@@ -11,7 +11,7 @@
 | المكوّن | المكان | الحالة |
 |---|---|---|
 | PWA (نسخة الويب) | جذر الريبو (`index.html`) | شغّالة إنتاج |
-| تطبيق Android أصلي | `android/` | تحت التطوير |
+| تطبيق Android (غلاف WebView) | `android/` | شغّال |
 | بناء الـ APK | `.github/workflows/` | GitHub Actions |
 
 **الريبو:** `khaledsabry255/PERMISSION-FROM-NCM` (كان اسمه `NCM-PERMISSION` واتغيّر — اللينكات القديمة لسه بتتحوّل تلقائياً).
@@ -106,6 +106,23 @@ CSS لازم يستخدم خصائص منطقية (`inset-inline-start` / `paddi
 > - **نشر على Google Play** = رسوم تسجيل مطوّر **25 دولار مرة واحدة**. مش مطلوب أصلاً — التطبيق بيتنزّل ويتنصّب من لينك الـ Releases مباشرةً ببلاش.
 > - أي backend مدفوع (Supabase Pro / استضافة / دومين خاص). لو احتجنا backend للتأمين، الحل المجاني هو **Google Apps Script** (مجاني بالكامل).
 > - لو الريبو بقى **خاص (private)**، دقايق GitHub Actions بتبقى محدودة. لازم يفضل **عام (public)** عشان البناء يفضل مجاني.
+
+---
+
+## تطبيق الأندرويد (`android/`)
+
+package `io.github.khaledsabry255.permission`. **مجرد WebView بيفتح نفس لينك GitHub Pages ملء الشاشة** — الواجهة كلها هي `index.html` نفسه، فأي تعديل على الويب بيظهر في التطبيق تلقائي من غير APK جديد.
+
+> 🚨 **متبنيش الواجهة تاني بـ Kotlin.** كانت متكتوبة بـ Compose قبل كده (لحد commit `ae13e94`) والنتيجة إن كل تعديل على الويب كان لازم يتعمل مرتين، والاتنين فضلوا مختلفين — آخر مرة اللوجو كان طالع بحروف بيضا في التطبيق واللي على الويب أزرق وأخضر ورمادي. الشكل بيتظبط في `index.html` بس.
+
+فيه ملف واحد بس: `MainActivity.kt` (الـ WebView + هوامش الشاشة والكيبورد + زرار الرجوع + صفحة «مفيش نت»).
+
+الـ APK بيتبني على GitHub Actions مع أي تعديل في `android/` وبينزل في release ثابت اسمه `latest-apk`:
+`https://github.com/khaledsabry255/PERMISSION-FROM-NCM/releases/download/latest-apk/NCM-Permission.apk`
+
+> 🚨 **مع أي تعديل في `android/` زوّد `versionCode` و `versionName`** في `android/app/build.gradle.kts`.
+
+> **مفيش JDK ولا Android SDK على جهاز خالد** — الكود مايتجربش محلياً، البناء على Actions هو اللي بيكشف أخطاء الكومبايل.
 
 ---
 

@@ -2,6 +2,7 @@
 <resources>
     <style name="Theme.NCMPermission" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">#EDF2F8</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">#EDF2F8</item>
         <item name="android:windowBackground">#EDF2F8</item>
     </style>
