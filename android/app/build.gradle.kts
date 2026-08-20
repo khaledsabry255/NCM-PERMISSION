@@ -14,8 +14,10 @@ android {
         applicationId = "io.github.khaledsabry255.permission"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2"
+        // 4 went out as the WebView build; the restored app has to sit above it
+        // or Android refuses to install it over what is already on the phone.
+        versionCode = 5
+        versionName = "1.3"
         resourceConfigurations += listOf("en", "ar")
     }
 
