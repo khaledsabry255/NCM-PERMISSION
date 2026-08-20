@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The interface is the web app itself, so only the launcher label lives here. -->
+    <!-- The in-app AR/EN toggle is handled in Kotlin (Strings.kt) so switching is
+         instant and does not depend on the device locale. Only the launcher label
+         lives here. -->
     <string name="app_name">NCM Permits</string>
 </resources>
