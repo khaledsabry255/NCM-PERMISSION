@@ -266,8 +266,12 @@ body{
 .status-dot.error{ background:var(--bad); }
 @keyframes statusPulse{ 0%{opacity:1;} 50%{opacity:.35;} 100%{opacity:1;} }
 
-/* Searching: the logo and connection state step aside entirely. */
-body.search-mode .app-header{ display:none; }
+/* Searching: the wordmark shrinks to make room for results, but it stays on
+   screen — the app should never look like a different app mid-search. */
+body.search-mode .app-header{ padding:6px 16px 2px; }
+body.search-mode .logo-mark .logo-ncm{ font-size:22px; }
+body.search-mode .logo-mark .logo-sub{ font-size:4.8px; letter-spacing:1.1px; margin-top:4px; }
+body.search-mode .system-status{ display:none; }
 
 /* ---- Tabs ---- */
 .tabs{
@@ -389,6 +393,10 @@ body.search-mode .tabs{ margin:10px 0; }
   padding:11px;
 }
 .count-badge{
+  /* "2 permits" is a number then a Latin word; inside an RTL box the two are
+     separate runs and get laid out right-to-left, reading "permits 2". Let the
+     badge take its direction from its own text instead. */
+  unicode-bidi:plaintext;
   background:#F7C58A;
   border:1px solid #D98B2B;
   color:#8A4E04;
@@ -458,8 +466,13 @@ body.search-mode .tabs{ margin:10px 0; }
   color:var(--ink-2);
   font-weight:800;
   font-size:13.5px;
-  white-space:nowrap;
   flex-shrink:0;
+  /* A fixed column: "Mail type" and "نوع الإرسال" are not the same length, and
+     letting the label size itself moved the value's edge on every language
+     change. The width holds the split still; long labels wrap instead. */
+  width:96px;
+  text-align:start;
+  overflow-wrap:break-word;
 }
 .record-row .v{ color:var(--ink); font-weight:800; flex:1; unicode-bidi:plaintext; text-align:left; }
 

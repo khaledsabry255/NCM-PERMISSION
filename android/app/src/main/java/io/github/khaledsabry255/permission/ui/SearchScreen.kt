@@ -204,8 +204,8 @@ private fun VehicleResults(
 
 @Composable
 private fun Header(strings: Strings, state: LoadState, searchMode: Boolean) {
-    // The site drops the header once a search is live; here it only steps down
-    // to a small wordmark, which is what was asked for.
+    // A live search only steps the wordmark down to a small one; it never
+    // leaves the screen, on either the site or here.
     Box(
         Modifier
             .fillMaxWidth()
