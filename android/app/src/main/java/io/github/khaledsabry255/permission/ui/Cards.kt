@@ -190,10 +190,12 @@ private fun OccurrenceBody(
     extraGroup: List<Pair<String, String>> = emptyList()
 ) {
     PermitBanner(status, strings, lang)
-    Spacer(Modifier.height(14.dp))
-    DateBox(strings.sendDate, day.ifEmpty { strings.notSpecified })
-    Spacer(Modifier.height(14.dp))
-    FieldRows(fields)
+    Spacer(Modifier.height(12.dp))
+    GroupHeading("NCM DATA")
+    Spacer(Modifier.height(8.dp))
+    FieldRows(
+        listOf(strings.sendDate to day.ifEmpty { strings.notSpecified }) + fields
+    )
     if (extraGroup.isNotEmpty()) {
         Spacer(Modifier.height(12.dp))
         GroupHeading("ASE DATA")
@@ -202,23 +204,23 @@ private fun OccurrenceBody(
     }
 }
 
-/** Same treatment as the send-date box, one size down. */
+/** The pale blue plate the site heads each block of rows with. */
 @Composable
 private fun GroupHeading(text: String) {
     Box(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(9.dp))
-            .background(Palette.Glass)
-            .border(BorderStroke(1.dp, Palette.GlassBorder), RoundedCornerShape(9.dp))
-            .padding(vertical = 7.dp, horizontal = 10.dp),
+            .background(Palette.Sky)
+            .border(BorderStroke(1.dp, Palette.SkyLine), RoundedCornerShape(9.dp))
+            .padding(vertical = 9.dp, horizontal = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text,
             color = Palette.TextMain,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.ExtraBold,
+            fontSize = 14.5.sp,
+            fontWeight = FontWeight.Black,
             letterSpacing = 1.2.sp
         )
     }
@@ -230,31 +232,31 @@ private fun PermitBanner(status: PermitStatus, strings: Strings, lang: Lang) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(11.dp))
             .background(c.background)
-            .border(BorderStroke(1.5.dp, c.border), RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .border(BorderStroke(1.5.dp, c.border), RoundedCornerShape(11.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
-                    .size(34.dp)
+                    .size(30.dp)
                     .clip(CircleShape)
                     .background(c.iconBackground),
                 contentAlignment = Alignment.Center
             ) {
-                PermitIcon(status.level, c.content)
+                PermitIcon(status.level, Palette.OnGold)
             }
             Spacer(Modifier.width(10.dp))
-            Text(strings.permitTag, color = c.content, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(strings.permitTag, color = c.content, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
         }
         Spacer(Modifier.width(10.dp))
         Text(
             permitText(status, lang, strings),
             color = c.content,
-            fontSize = 16.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.End,
             modifier = Modifier.weight(1f, fill = false)
@@ -305,23 +307,6 @@ private fun PermitIcon(level: PermitLevel, tint: Color) {
                 drawCircle(tint, radius = 1.1f * u, center = Offset(12 * u, 16.5f * u))
             }
         }
-    }
-}
-
-@Composable
-private fun DateBox(label: String, value: String) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(11.dp))
-            .background(Palette.Card)
-            .border(BorderStroke(1.dp, Palette.Edge), RoundedCornerShape(11.dp))
-            .padding(vertical = 12.dp, horizontal = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(label, color = Palette.TextMain, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(4.dp))
-        Text(value, color = Palette.TextDim, fontSize = 12.5.sp, textAlign = TextAlign.Center)
     }
 }
 
