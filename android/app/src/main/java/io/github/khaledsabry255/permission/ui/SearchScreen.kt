@@ -1,5 +1,6 @@
 package io.github.khaledsabry255.permission.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -65,6 +66,13 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
 
     // Once a search is live, everything that isn't a result gets out of the way.
     val searchMode = if (tab == 0) indSubmitted.isNotBlank() else vehSubmitted.isNotBlank()
+
+    // The phone's back gesture leaves the results the same way the X does,
+    // instead of closing the app out from under a search.
+    BackHandler(enabled = searchMode) {
+        if (tab == 0) { indQuery = ""; indSubmitted = "" }
+        else { vehQuery = ""; vehSubmitted = "" }
+    }
 
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
 
@@ -269,12 +277,12 @@ private fun RefreshButton(onRefresh: () -> Unit) {
         Modifier
             .size(44.dp)
             .clip(RoundedCornerShape(11.dp))
-            .background(Palette.TabOffBg)
-            .border(BorderStroke(1.dp, Palette.TabOffBr), RoundedCornerShape(11.dp))
+            .background(Palette.Gold)
+            .border(BorderStroke(1.dp, Palette.Gold), RoundedCornerShape(11.dp))
             .clickable(onClick = onRefresh),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(Modifier.size(18.dp)) { drawRefreshIcon(Palette.TabOffInk) }
+        Canvas(Modifier.size(18.dp)) { drawRefreshIcon(Palette.OnGold) }
     }
 }
 
@@ -336,14 +344,15 @@ private fun SearchCard(
         ) {
             Canvas(Modifier.size(16.dp)) { drawSearchIcon(Palette.TextDim) }
             Spacer(Modifier.width(9.dp))
-            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 if (value.isEmpty()) {
                     Text(
                         placeholder,
                         color = Palette.TextDim,
-                        fontSize = 14.5.sp,
+                        fontSize = 13.5.sp,
                         fontWeight = FontWeight.SemiBold,
-                        maxLines = 1
+                        maxLines = 1,
+                        textAlign = TextAlign.Center
                     )
                 }
                 BasicTextField(
@@ -354,7 +363,8 @@ private fun SearchCard(
                         color = Palette.TextMain,
                         fontSize = 14.5.sp,
                         fontWeight = FontWeight.SemiBold,
-                        fontFamily = Fonts.Sans
+                        fontFamily = Fonts.Sans,
+                        textAlign = TextAlign.Center
                     ),
                     cursorBrush = SolidColor(Palette.Gold),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

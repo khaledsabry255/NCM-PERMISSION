@@ -117,8 +117,9 @@ body{
 }
 .search-go{
   flex-shrink:0;
+  width:74px;          /* fixed: "بحث" and "Search" must not resize the field */
   height:44px;
-  padding:0 20px;
+  padding:0;
   border:none;
   border-radius:9px;
   background:var(--blue);
@@ -143,8 +144,11 @@ body{
 .searchrow input{
   width:100%;
   padding-block:11px;
-  padding-inline-start:40px;
-  padding-inline-end:40px;
+  /* Symmetric, and no wider than the icons actually need: the longest
+     placeholder has to fit inside the padding or centring silently gives up
+     and the text lands against one edge. */
+  padding-inline-start:32px;
+  padding-inline-end:32px;
   text-align:center;
   border-radius:9px;
   border:1px solid var(--line);
@@ -157,6 +161,11 @@ body{
   transition:border-color .15s ease, box-shadow .15s ease;
 }
 .searchrow input::placeholder{ color:var(--ink-2); font-weight:400; }
+/* Narrow phones: shrink the hint rather than let it outgrow its box. */
+@media (max-width:400px){
+  .searchrow input{ font-size:13px; padding-inline-start:28px; padding-inline-end:28px; }
+  .searchrow input::placeholder{ font-size:12.5px; }
+}
 .searchrow input:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(21,101,192,0.14); }
 .clear-btn{
   position:absolute;
@@ -173,11 +182,13 @@ body{
 /* Globe + language toggle (single button: shows the language you switch TO) */
 .lang-toggle{
   flex-shrink:0;
+  width:64px;          /* fixed: "EN" and "AR" must not resize the row */
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:5px;
   height:44px;
-  padding:0 13px;
+  padding:0;
   border:1px solid var(--blue);
   border-radius:9px;
   background:var(--blue);
@@ -194,10 +205,10 @@ body{
   flex-shrink:0;
   width:44px; height:44px;
   display:flex; align-items:center; justify-content:center;
-  border:1px solid #7BC49F;
+  border:1px solid var(--blue);
   border-radius:9px;
-  background:#A9D6BC;
-  color:#0F6E3F;
+  background:var(--blue);
+  color:#fff;
   cursor:pointer; padding:0;
 }
 .refresh-btn:active{ filter:brightness(0.96); }
@@ -260,6 +271,8 @@ body.search-mode .app-header{ display:none; }
 
 /* ---- Tabs ---- */
 .tabs{
+  flex:1;
+  min-width:0;
   display:flex;
   gap:8px;
   background:transparent;
@@ -269,7 +282,8 @@ body.search-mode .app-header{ display:none; }
 }
 body.search-mode .tabs{ margin:10px 0; }
 .tab-btn{
-  flex:1;
+  flex:1 1 0;          /* equal halves, whatever the translated label costs */
+  min-width:0;
   border:1px solid var(--line);
   border-radius:11px;
   padding:10px;
@@ -811,7 +825,10 @@ const PERMIT_PHRASE_EN = [
 
 function applyStaticI18n(){
   document.documentElement.lang = LANG;
-  document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+  // The page is laid out right-to-left in both languages on purpose. Flipping
+  // `dir` with the language moved every control to the opposite side, which is
+  // not what switching language is meant to do — only the words should change.
+  document.documentElement.dir = "rtl";
   document.querySelectorAll("[data-i18n]").forEach(el=>{
     el.textContent = t(el.dataset.i18n);
   });
@@ -1423,12 +1440,34 @@ function updateSearchMode(){
 
 function runSearch(){
   const value = mainInput.value;
+  const wasSearching = document.body.classList.contains("search-mode");
   drafts[activeTab] = value;
   submitted[activeTab] = value;
   if(activeTab === "individuals") searchIndividuals(value);
   else searchVehicles(value);
   updateSearchMode();
+  // Entering results puts an entry on the history stack, so the phone's own
+  // back gesture leaves the results the way the X does. One entry covers the
+  // whole visit — searching again while already in results must not stack up.
+  if(!wasSearching && document.body.classList.contains("search-mode")){
+    try{ history.pushState({ ncmSearch:true }, ""); }catch(e){}
+  }
 }
+
+/** Empties the field and leaves the results, without touching history. */
+function exitSearch(){
+  mainInput.value = "";
+  drafts[activeTab] = "";
+  submitted[activeTab] = "";
+  if(activeTab === "individuals") searchIndividuals("");
+  else searchVehicles("");
+  syncClear();
+  updateSearchMode();
+}
+
+window.addEventListener("popstate", ()=>{
+  if(document.body.classList.contains("search-mode")) exitSearch();
+});
 
 function switchTab(tab){
   drafts[activeTab] = mainInput.value;
@@ -1458,9 +1497,12 @@ mainInput.addEventListener("keydown", e=>{
 });
 mainInput.addEventListener("input", syncClear);
 mainClear.addEventListener("click", ()=>{
-  mainInput.value = "";
-  syncClear();
-  runSearch();
+  if(document.body.classList.contains("search-mode") &&
+     history.state && history.state.ncmSearch){
+    history.back();   // popstate does the clearing, and the entry is spent
+  }else{
+    exitSearch();
+  }
   mainInput.focus();
 });
 syncPlaceholder();

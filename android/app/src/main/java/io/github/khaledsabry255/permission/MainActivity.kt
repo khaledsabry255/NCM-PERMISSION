@@ -37,7 +37,10 @@ class MainActivity : ComponentActivity() {
             var unlocked by remember { mutableStateOf(prefs.isUnlocked()) }
 
             val strings = stringsFor(lang)
-            val direction = if (lang == Lang.AR) LayoutDirection.Rtl else LayoutDirection.Ltr
+            // Laid out right-to-left in both languages on purpose. Following the
+            // language moved every control to the opposite side, which is not what
+            // switching language is meant to do — only the words should change.
+            val direction = LayoutDirection.Rtl
 
             MaterialTheme(
                 colorScheme = lightColorScheme(
