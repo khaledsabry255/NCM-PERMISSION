@@ -775,6 +775,13 @@ function t(key, arg){
 /* Arabic names for the ASE DATA columns, keyed on the header text in the sheet
    (matched case-insensitively). A header with no entry here shows as written,
    so a newly added column still appears — just untranslated until listed. */
+// Sheet-keeping columns: internal row ids, formula scratch, anything marked
+// "(auto)". They are for the sheet's own bookkeeping, never for the card.
+function isHelperColumn(header){
+  const h = String(header).trim().toLowerCase();
+  return /\(auto\)|^db row|^helper|^internal|^_/.test(h);
+}
+
 const ASE_LABEL_AR = {
   "letter number": "رقم الخطاب",
   "company name": "اسم الشركة",
@@ -1053,11 +1060,12 @@ async function initIndividuals(){
 
     // Everything from "Letter Number" to the last column belongs to ASE DATA.
     // Labels come from the sheet header, so columns added later appear on their
-    // own without a code change.
+    // own without a code change. Bookkeeping columns the sheet keeps for itself
+    // are skipped, otherwise a raw database row number lands in front of the user.
     indAseColumns = [];
     for(let c = IND_COL.LETTER; c < headerRow.length; c++){
       const label = normalize(headerRow[c]);
-      if(label) indAseColumns.push({ index:c, label });
+      if(label && !isHelperColumn(label)) indAseColumns.push({ index:c, label });
     }
 
     individualsGroups = new Map();

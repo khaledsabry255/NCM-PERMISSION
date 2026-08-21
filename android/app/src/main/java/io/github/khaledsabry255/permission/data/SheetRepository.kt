@@ -51,9 +51,9 @@ object SheetRepository {
     suspend fun load(): SheetData = withContext(Dispatchers.IO) {
         val individualsCsv = fetch(csvUrl(SHEET_INDIVIDUALS))
         val aseColumns = aseHeaderLabels(individualsCsv)
-        val people = parsePeople(individualsCsv, aseColumns.size)
+        val people = parsePeople(individualsCsv, aseColumns.map { it.first })
         val vehicles = parseVehicles(fetch(csvUrl(SHEET_VEHICLES)))
-        SheetData(people, vehicles, aseColumns)
+        SheetData(people, vehicles, aseColumns.map { it.second })
     }
 
     private fun fetch(urlStr: String): String {
@@ -90,18 +90,30 @@ object SheetRepository {
     private fun rawCell(cols: List<String>, i: Int): String =
         if (i < cols.size) cols[i] else ""
 
-    /** Header labels from IND_ASE_START to the last non-blank column. */
-    private fun aseHeaderLabels(csv: String): List<String> {
+    /**
+     * Sheet-keeping columns: internal row ids, formula scratch, anything marked
+     * "(auto)". They belong to the sheet's own bookkeeping, never to the card.
+     */
+    private val HELPER_HEADER = Regex("""\(auto\)|^db row|^helper|^internal|^_""")
+
+    /**
+     * Column index paired with its header label, from IND_ASE_START to the last
+     * non-blank column, skipping the sheet's own bookkeeping columns. The index
+     * travels with the label because skipping one leaves a gap.
+     */
+    private fun aseHeaderLabels(csv: String): List<Pair<Int, String>> {
         val header = Csv.parse(csv).firstOrNull() ?: return emptyList()
-        val out = mutableListOf<String>()
+        val out = mutableListOf<Pair<Int, String>>()
         for (c in IND_ASE_START until header.size) {
             val label = Permit.normalize(header[c])
-            if (label.isNotEmpty()) out.add(label)
+            if (label.isEmpty()) continue
+            if (HELPER_HEADER.containsMatchIn(label.lowercase())) continue
+            out.add(c to label)
         }
         return out
     }
 
-    private fun parsePeople(csv: String, aseCount: Int): List<PersonGroup> {
+    private fun parsePeople(csv: String, aseIndices: List<Int>): List<PersonGroup> {
         val rows = Csv.parse(csv).drop(1) // skip header row
         val grouped = LinkedHashMap<String, MutableList<PersonRecord>>()
         val identity = LinkedHashMap<String, Pair<String, String>>() // key -> (name, id)
@@ -121,7 +133,7 @@ object SheetRepository {
                     note = cell(cols, IND_NOTE),
                     sender = cell(cols, IND_SENDER),
                     mailType = cell(cols, IND_MAIL_TYPE),
-                    ase = (0 until aseCount).map { cell(cols, IND_ASE_START + it) },
+                    ase = aseIndices.map { cell(cols, it) },
                     permitRaw = rawCell(cols, IND_PERMIT),
                     day = cell(cols, IND_DAY),
                     dayMillis = Permit.parseDate(rawCell(cols, IND_DAY))
