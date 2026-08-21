@@ -25,6 +25,7 @@ object Palette {
     val Card = Color(0xFFFFFFFF)
     val Field = Color(0xFFF3F7FB)
     val Line = Color(0xFFD2DEEC)
+    val LineSoft = Color(0xFFE2E9F2)
     val Edge = Color(0xFFC0D3EC)
     val RowBg = Color(0xFFFFFFFF)
     val RowLine = Color(0xFFC7D3E0)
@@ -46,6 +47,15 @@ object Palette {
     val Unclear = Color(0xFF5A646C)
     val UnclearBg = Color(0xFFEDF0F3)
     val UnclearBr = Color(0xFFCBD3DB)
+
+    // Tab row, straight off the site: the open tab is amber, the other is a
+    // plain white box rather than an empty slot.
+    val TabOnBg = Color(0xFFFFD24D)
+    val TabOnBr = Color(0xFFE0A800)
+    val TabOnInk = Color(0xFF0B1114)
+    val TabOffBg = Color(0xFFFFFFFF)
+    val TabOffBr = Color(0xFFD2DEEC)
+    val TabOffInk = Color(0xFF2A3238)
 
     // Permit-count badge
     val CountBg = Color(0xFFF7C58A)

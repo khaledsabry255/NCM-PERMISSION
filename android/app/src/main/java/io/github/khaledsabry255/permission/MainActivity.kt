@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
@@ -47,7 +48,12 @@ class MainActivity : ComponentActivity() {
                     onSurface = Palette.TextMain
                 )
             ) {
-                CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                // Every Text inherits this, so the whole app is drawn in the
+                // site's face instead of the system default.
+                CompositionLocalProvider(
+                    LocalLayoutDirection provides direction,
+                    LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = Fonts.Sans)
+                ) {
                     Box(
                         Modifier
                             .fillMaxSize()
@@ -62,24 +68,34 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         } else {
-                            SearchScreen(strings = strings, lang = lang)
+                            // Past the gate the control belongs in the tab row, which
+                            // is where the site keeps it.
+                            SearchScreen(
+                                strings = strings,
+                                lang = lang,
+                                onLangChange = { newLang ->
+                                    lang = newLang
+                                    prefs.lang = newLang
+                                }
+                            )
                         }
 
-                        // Rendered once, at the root, above both screens, and pinned to a
-                        // physical corner (AbsoluteAlignment) — so it cannot move when the
-                        // header collapses or when the layout direction flips.
-                        LangSwitch(
-                            lang = lang,
-                            onLangChange = { newLang ->
-                                lang = newLang
-                                prefs.lang = newLang
-                            },
-                            modifier = Modifier
-                                .align(AbsoluteAlignment.TopRight)
-                                .statusBarsPadding()
-                                // absolutePadding, not padding: `end` would flip sides in RTL.
-                                .absolutePadding(top = 14.dp, right = 12.dp)
-                        )
+                        // The lock screen has no row to carry it, so on that screen only
+                        // the control is pinned to a physical corner (AbsoluteAlignment)
+                        // and cannot move when the layout direction flips.
+                        if (!unlocked) {
+                            LangButton(
+                                lang = lang,
+                                onLangChange = { newLang ->
+                                    lang = newLang
+                                    prefs.lang = newLang
+                                },
+                                modifier = Modifier
+                                    .align(AbsoluteAlignment.TopRight)
+                                    .statusBarsPadding()
+                                    .absolutePadding(top = 14.dp, right = 12.dp)
+                            )
+                        }
                     }
                 }
             }

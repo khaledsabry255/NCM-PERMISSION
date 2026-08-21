@@ -101,9 +101,9 @@ private fun RecordCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.03f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.09f)), RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(Palette.Glass)
+            .border(BorderStroke(1.dp, Palette.GlassBorder), RoundedCornerShape(18.dp))
     ) {
         Column(Modifier.padding(start = 18.dp, end = 18.dp, top = 14.dp)) {
 
@@ -136,14 +136,14 @@ private fun RecordCard(
                 title,
                 color = Palette.TextMain,
                 fontSize = 21.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.04f))
-                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)), RoundedCornerShape(12.dp))
-                    .padding(vertical = 14.dp, horizontal = 10.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(Palette.Card)
+                    .border(BorderStroke(1.dp, Palette.Edge), RoundedCornerShape(11.dp))
+                    .padding(vertical = 13.dp, horizontal = 10.dp)
             )
 
             if (subtitle != null) {
@@ -151,24 +151,20 @@ private fun RecordCard(
                 Text(
                     subtitle,
                     color = if (subtitleHighlighted) Palette.GoldSoft else Palette.TextDim,
-                    fontSize = 15.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.4.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            if (subtitleHighlighted) Palette.Gold.copy(alpha = 0.06f)
-                            else Color.White.copy(alpha = 0.04f)
-                        )
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(if (subtitleHighlighted) Palette.BgMid else Palette.Card)
                         .border(
                             BorderStroke(
                                 1.dp,
-                                if (subtitleHighlighted) Palette.Gold.copy(alpha = 0.22f)
-                                else Color.White.copy(alpha = 0.10f)
+                                if (subtitleHighlighted) Palette.Gold else Palette.Edge
                             ),
-                            RoundedCornerShape(12.dp)
+                            RoundedCornerShape(11.dp)
                         )
                         .padding(vertical = 11.dp, horizontal = 10.dp)
                 )
@@ -317,9 +313,9 @@ private fun DateBox(label: String, value: String) {
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.04f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)), RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(11.dp))
+            .background(Palette.Card)
+            .border(BorderStroke(1.dp, Palette.Edge), RoundedCornerShape(11.dp))
             .padding(vertical = 12.dp, horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -332,42 +328,42 @@ private fun DateBox(label: String, value: String) {
 @Composable
 private fun FieldRows(fields: List<Pair<String, String>>) {
     Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.07f)), RoundedCornerShape(10.dp))
+        Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(7.dp)
     ) {
-        fields.forEachIndexed { i, (key, value) ->
+        fields.forEach { (key, value) ->
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Palette.RowBg)
+                    .border(BorderStroke(1.dp, Palette.RowLine), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 14.dp, vertical = 11.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(key, color = Palette.TextDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(key, color = Palette.TextDim, fontSize = 13.5.sp, fontWeight = FontWeight.ExtraBold)
                 Spacer(Modifier.width(14.dp))
                 Text(
                     value.ifEmpty { "—" },
                     color = Palette.TextMain,
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.End,
                     modifier = Modifier.weight(1f)
                 )
             }
-            if (i != fields.lastIndex) HorizontalDivider(alpha = 0.06f)
         }
     }
 }
 
 @Composable
-private fun HorizontalDivider(alpha: Float = 0.08f) {
+private fun HorizontalDivider() {
     Box(
         Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(Color.White.copy(alpha = alpha))
+            .background(Palette.LineSoft)
     )
 }
 
@@ -375,22 +371,22 @@ private fun HorizontalDivider(alpha: Float = 0.08f) {
 private fun OccurrenceChip(label: String, active: Boolean, onClick: () -> Unit) {
     Box(
         Modifier
-            .heightIn(min = 32.dp)
-            .widthIn(min = 32.dp)
+            .heightIn(min = 30.dp)
+            .widthIn(min = 30.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (active) Palette.Gold.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.03f))
+            .background(if (active) Palette.Gold else Palette.Card)
             .border(
-                BorderStroke(1.dp, if (active) Palette.Gold else Palette.GlassBorder),
+                BorderStroke(1.dp, if (active) Palette.Gold else Palette.Line),
                 RoundedCornerShape(8.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             label,
-            color = if (active) Palette.GoldSoft else Palette.TextDim,
-            fontSize = 13.sp,
+            color = if (active) Palette.OnGold else Palette.TextDim,
+            fontSize = 12.5.sp,
             fontWeight = FontWeight.Bold
         )
     }
@@ -401,10 +397,10 @@ private fun CountBadge(text: String) {
     Box(
         Modifier
             .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)), CircleShape)
-            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .background(Palette.CountBg)
+            .border(BorderStroke(1.dp, Palette.CountBr), CircleShape)
+            .padding(horizontal = 11.dp, vertical = 5.dp)
     ) {
-        Text(text, color = Palette.TextDim, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Text(text, color = Palette.CountInk, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
     }
 }

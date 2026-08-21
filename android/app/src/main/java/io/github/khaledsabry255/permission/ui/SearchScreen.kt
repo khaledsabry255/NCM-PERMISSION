@@ -43,7 +43,7 @@ private sealed interface LoadState {
 }
 
 @Composable
-fun SearchScreen(strings: Strings, lang: Lang) {
+fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
 
     var state by remember { mutableStateOf<LoadState>(LoadState.Loading) }
     var attempt by remember { mutableIntStateOf(0) }
@@ -70,24 +70,26 @@ fun SearchScreen(strings: Strings, lang: Lang) {
 
         Header(strings, state, searchMode)
 
-        Column(Modifier.padding(horizontal = 16.dp)) {
+        Column(Modifier.padding(horizontal = 14.dp)) {
 
-            Spacer(Modifier.height(if (searchMode) 10.dp else 18.dp))
+            Spacer(Modifier.height(6.dp))
 
             Tabs(
                 strings = strings,
                 selected = tab,
-                onSelect = { tab = it }
+                lang = lang,
+                onSelect = { tab = it },
+                onLangChange = onLangChange,
+                onRefresh = { attempt++ }
             )
 
-            Spacer(Modifier.height(if (searchMode) 10.dp else 16.dp))
+            Spacer(Modifier.height(9.dp))
 
             if (tab == 0) {
                 SearchCard(
                     value = indQuery,
                     placeholder = strings.searchPlaceholderInd,
                     buttonLabel = strings.searchBtn,
-                    compact = searchMode,
                     onValueChange = { indQuery = it },
                     onSubmit = { indSubmitted = indQuery },
                     onClear = { indQuery = ""; indSubmitted = "" }
@@ -97,7 +99,6 @@ fun SearchScreen(strings: Strings, lang: Lang) {
                     value = vehQuery,
                     placeholder = strings.searchPlaceholderVeh,
                     buttonLabel = strings.searchBtn,
-                    compact = searchMode,
                     onValueChange = { vehQuery = it },
                     onSubmit = { vehSubmitted = vehQuery },
                     onClear = { vehQuery = ""; vehSubmitted = "" }
@@ -216,7 +217,7 @@ private fun Header(
             if (searchMode) {
                 NcmLogo(markSize = 21.sp, subSize = 5.8.sp, subSpacing = 2.1.sp)
             } else {
-                NcmLogo(markSize = 40.sp, subSize = 9.4.sp, subSpacing = 3.8.sp)
+                NcmLogo(markSize = 40.sp, subSize = 8.6.sp, subSpacing = 2.05.sp)
 
                 Spacer(Modifier.height(11.dp))
 
@@ -239,27 +240,47 @@ private fun Header(
         }
     }
 
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(Color.White.copy(alpha = 0.07f))
-    )
 }
 
 @Composable
-private fun Tabs(strings: Strings, selected: Int, onSelect: (Int) -> Unit) {
+private fun Tabs(
+    strings: Strings,
+    selected: Int,
+    lang: Lang,
+    onSelect: (Int) -> Unit,
+    onLangChange: (Lang) -> Unit,
+    onRefresh: () -> Unit
+) {
     Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.04f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), RoundedCornerShape(12.dp))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Modifier.fillMaxWidth().height(44.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        TabButton(strings.tabIndividuals, selected == 0, Modifier.weight(1f), { onSelect(0) }) { drawPersonIcon(it) }
-        TabButton(strings.tabVehicles, selected == 1, Modifier.weight(1f), { onSelect(1) }) { drawCarIcon(it) }
+        RefreshButton(onRefresh)
+        Row(
+            Modifier.weight(1f).fillMaxHeight(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            TabButton(strings.tabIndividuals, selected == 0, Modifier.weight(1f), { onSelect(0) }) { drawPersonIcon(it) }
+            TabButton(strings.tabVehicles, selected == 1, Modifier.weight(1f), { onSelect(1) }) { drawCarIcon(it) }
+        }
+        LangButton(lang, onLangChange)
+    }
+}
+
+/** The site's reload control: a plain bordered square carrying a round arrow. */
+@Composable
+private fun RefreshButton(onRefresh: () -> Unit) {
+    Box(
+        Modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(11.dp))
+            .background(Palette.TabOffBg)
+            .border(BorderStroke(1.dp, Palette.TabOffBr), RoundedCornerShape(11.dp))
+            .clickable(onClick = onRefresh),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(Modifier.size(18.dp)) { drawRefreshIcon(Palette.TabOffInk) }
     }
 }
 
@@ -271,19 +292,24 @@ private fun TabButton(
     onClick: () -> Unit,
     icon: DrawScope.(Color) -> Unit
 ) {
-    val content = if (active) Palette.OnGold else Palette.TextDim
+    val content = if (active) Palette.TabOnInk else Palette.TabOffInk
     Row(
         modifier
-            .clip(RoundedCornerShape(9.dp))
-            .background(if (active) Palette.Gold else Color.Transparent)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(11.dp))
+            .background(if (active) Palette.TabOnBg else Palette.TabOffBg)
+            .border(
+                BorderStroke(1.dp, if (active) Palette.TabOnBr else Palette.TabOffBr),
+                RoundedCornerShape(11.dp)
+            )
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
+            .padding(horizontal = 6.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Canvas(Modifier.size(16.dp)) { icon(content) }
         Spacer(Modifier.width(7.dp))
-        Text(label, color = content, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = content, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }
 
@@ -292,95 +318,93 @@ private fun SearchCard(
     value: String,
     placeholder: String,
     buttonLabel: String,
-    compact: Boolean,
     onValueChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onClear: () -> Unit
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
 
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .then(
-                if (compact) Modifier
-                else Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White.copy(alpha = 0.03f))
-                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), RoundedCornerShape(14.dp))
-                    .padding(14.dp)
-            )
+    // The site sets the field and its button side by side on one 45px line.
+    Row(
+        Modifier.fillMaxWidth().height(45.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
             Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color.Black.copy(alpha = 0.22f))
-                .border(BorderStroke(1.dp, Palette.GlassBorder), RoundedCornerShape(10.dp))
-                .padding(horizontal = 14.dp),
+                .weight(1f)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(9.dp))
+                .background(Palette.Field)
+                .border(BorderStroke(1.dp, Palette.Line), RoundedCornerShape(9.dp))
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Canvas(Modifier.size(18.dp)) { drawSearchIcon(Palette.TextDim) }
-            Spacer(Modifier.width(12.dp))
-            Box(Modifier.weight(1f)) {
+            Canvas(Modifier.size(16.dp)) { drawSearchIcon(Palette.TextDim) }
+            Spacer(Modifier.width(9.dp))
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (value.isEmpty()) {
-                    Text(placeholder, color = Palette.TextDim, fontSize = 15.5.sp)
+                    Text(
+                        placeholder,
+                        color = Palette.TextDim,
+                        fontSize = 14.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
                 }
                 BasicTextField(
                     value = value,
                     onValueChange = onValueChange,
                     singleLine = true,
-                    textStyle = TextStyle(color = Palette.TextMain, fontSize = 15.5.sp),
+                    textStyle = TextStyle(
+                        color = Palette.TextMain,
+                        fontSize = 14.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = Fonts.Sans
+                    ),
                     cursorBrush = SolidColor(Palette.Gold),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = {
                         keyboard?.hide()
                         onSubmit()
                     }),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 14.dp)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
             if (value.isNotEmpty()) {
                 Spacer(Modifier.width(8.dp))
                 Box(
                     Modifier
-                        .size(24.dp)
+                        .size(20.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.09f))
+                        .background(Palette.Line)
                         .clickable(onClick = onClear),
                     contentAlignment = Alignment.Center
                 ) {
-                    Canvas(Modifier.size(12.dp)) { drawCloseIcon(Palette.TextDim) }
+                    Canvas(Modifier.size(10.dp)) { drawCloseIcon(Palette.TextDim) }
                 }
             }
         }
 
-        // Once results are on screen the button is dead weight — the field's own
-        // Search key does the same job.
-        if (!compact) {
-            Spacer(Modifier.height(8.dp))
-
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Palette.Gold)
-                    .clickable {
-                        keyboard?.hide()
-                        onSubmit()
-                    }
-                    .padding(vertical = 13.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    buttonLabel,
-                    color = Palette.OnGold,
-                    fontSize = 14.5.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-            }
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(9.dp))
+                .background(Palette.Gold)
+                .clickable {
+                    keyboard?.hide()
+                    onSubmit()
+                }
+                .padding(horizontal = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                buttonLabel,
+                color = Palette.OnGold,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1
+            )
         }
     }
 }
@@ -487,6 +511,22 @@ private fun DrawScope.drawCloseIcon(tint: Color) {
     val w = 2.6f * u
     drawLine(tint, Offset(6 * u, 6 * u), Offset(18 * u, 18 * u), w, StrokeCap.Round)
     drawLine(tint, Offset(18 * u, 6 * u), Offset(6 * u, 18 * u), w, StrokeCap.Round)
+}
+
+private fun DrawScope.drawRefreshIcon(tint: Color) {
+    val u = unit()
+    val s = Stroke(width = 2.1f * u, cap = StrokeCap.Round)
+    drawArc(
+        color = tint,
+        startAngle = 40f,
+        sweepAngle = 290f,
+        useCenter = false,
+        topLeft = Offset(3 * u, 3 * u),
+        size = Size(18 * u, 18 * u),
+        style = s
+    )
+    drawLine(tint, Offset(21 * u, 3 * u), Offset(21 * u, 9 * u), s.width, StrokeCap.Round)
+    drawLine(tint, Offset(21 * u, 9 * u), Offset(15 * u, 9 * u), s.width, StrokeCap.Round)
 }
 
 private fun DrawScope.drawPersonIcon(tint: Color) {

@@ -81,7 +81,7 @@ fun LockScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            NcmLogo(markSize = 52.sp, subSize = 12.sp, subSpacing = 4.8.sp)
+            NcmLogo(markSize = 46.sp, subSize = 10.sp, subSpacing = 2.4.sp)
 
             Spacer(Modifier.height(40.dp))
 
@@ -118,9 +118,9 @@ fun LockScreen(
                         Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.03f))
+                            .background(Palette.Card)
                             .border(
-                                BorderStroke(1.dp, if (error) Palette.Bad else Palette.Gold.copy(alpha = 0.3f)),
+                                BorderStroke(1.dp, if (error) Palette.Bad else Palette.Edge),
                                 RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center

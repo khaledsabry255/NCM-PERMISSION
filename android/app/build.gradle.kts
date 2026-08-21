@@ -16,8 +16,8 @@ android {
         targetSdk = 35
         // 4 went out as the WebView build; the restored app has to sit above it
         // or Android refuses to install it over what is already on the phone.
-        versionCode = 5
-        versionName = "1.3"
+        versionCode = 6
+        versionName = "1.4"
         resourceConfigurations += listOf("en", "ar")
     }
 
