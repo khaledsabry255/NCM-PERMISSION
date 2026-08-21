@@ -1,5 +1,7 @@
 package io.github.khaledsabry255.permission.ui
 
+import io.github.khaledsabry255.permission.data.DateNote
+import io.github.khaledsabry255.permission.data.Permit
 import io.github.khaledsabry255.permission.data.PermitKind
 import io.github.khaledsabry255.permission.data.PermitStatus
 
@@ -90,14 +92,24 @@ private val PERMIT_PHRASE_EN = listOf(
     "منع" to "Banned"
 )
 
-fun permitText(status: PermitStatus, lang: Lang, s: Strings): String = when (status.kind) {
-    PermitKind.PENDING -> s.permitPending
-    PermitKind.UNDETERMINED -> s.permitUndetermined
+/**
+  * What the banner shows: the value on one line, and anything the cell carried
+  * after a date on a second, quieter one — the same split the site makes.
+  */
+fun permitText(status: PermitStatus, lang: Lang, s: Strings): DateNote = when (status.kind) {
+    PermitKind.PENDING -> DateNote(s.permitPending, "")
+    PermitKind.UNDETERMINED -> DateNote(s.permitUndetermined, "")
     PermitKind.RAW -> {
-        if (lang == Lang.EN) {
-            PERMIT_PHRASE_EN.firstOrNull { status.raw.contains(it.first) }?.second ?: status.raw
+        val split = Permit.splitDateAndNote(status.raw)
+        if (split.date != null) {
+            DateNote(split.date, split.note)
+        } else if (lang == Lang.EN) {
+            DateNote(
+                PERMIT_PHRASE_EN.firstOrNull { status.raw.contains(it.first) }?.second ?: status.raw,
+                ""
+            )
         } else {
-            status.raw
+            DateNote(status.raw, "")
         }
     }
 }

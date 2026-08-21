@@ -12,6 +12,9 @@ enum class PermitLevel { OK, SOON, BAD, BAN, UNCLEAR }
  */
 enum class PermitKind { PENDING, UNDETERMINED, RAW }
 
+/** A cell that starts with a date: the date itself, and the text after it. */
+data class DateNote(val date: String?, val note: String)
+
 data class PermitStatus(
     val kind: PermitKind,
     val level: PermitLevel,
@@ -26,8 +29,19 @@ object Permit {
 
     private val DATE_RE = Regex("""^(\d{1,2})([-/])(\d{1,2})[-/](\d{4})""")
 
+    /** Arabic-Indic and Persian digits, rewritten to 0-9. Letters are untouched. */
+    private fun toLatinDigits(s: String): String = buildString {
+        for (c in s) append(
+            when (c) {
+                in '٠'..'٩' -> '0' + (c - '٠')
+                in '۰'..'۹' -> '0' + (c - '۰')
+                else -> c
+            }
+        )
+    }
+
     fun normalize(s: String?): String =
-        (s ?: "").replace(Regex("""\s+"""), " ").trim()
+        toLatinDigits(s ?: "").replace(Regex("""\s+"""), " ").trim()
 
     /**
      * The sheet hands us two different date shapes:
@@ -39,11 +53,11 @@ object Permit {
      * from the separator, and fall back to day-first when the numbers rule out
      * month-first.
      */
-    fun parseDate(v: String?): Long? {
-        val s = normalize(v)
-        if (s.isEmpty()) return null
+    private data class Parts(val day: Int, val month: Int, val year: Int, val matched: String, val millis: Long)
+
+    private fun parts(s: String): Parts? {
         val m = DATE_RE.find(s) ?: return null
-        val (aStr, sep, bStr, yStr) = m.destructured
+        val (aStr, _, bStr, yStr) = m.destructured
 
         val a = aStr.toInt()
         val b = bStr.toInt()
@@ -51,7 +65,7 @@ object Permit {
 
         // The sheet is normalised to day-first (dd/mm/yyyy). Only read month-first
         // when day-first is impossible, which is what a legacy US-order export
-        // looks like. `sep` is kept for that older shape.
+        // looks like.
         val day: Int
         val month: Int
         if (b > 12 && a <= 12) {
@@ -62,15 +76,38 @@ object Permit {
 
         if (month !in 1..12 || day !in 1..31) return null
 
-        return try {
+        val millis = try {
             val cal = Calendar.getInstance()
             cal.isLenient = false // reject 31-02 instead of rolling it over
             cal.clear()
             cal.set(year, month - 1, day)
             cal.timeInMillis
         } catch (e: Exception) {
-            null
+            return null
         }
+        return Parts(day, month, year, m.value, millis)
+    }
+
+    fun parseDate(v: String?): Long? {
+        val s = normalize(v)
+        if (s.isEmpty()) return null
+        return parts(s)?.millis
+    }
+
+    /**
+     * Splits a cell into a tidy dd/mm/yyyy date plus whatever text trailed it,
+     * so "18-11-2025(ABNA SINA)" reads as a date with its note beside it — which
+     * is what the site shows.
+     */
+    fun splitDateAndNote(v: String?): DateNote {
+        val s = normalize(v)
+        if (s.isEmpty()) return DateNote(null, "")
+        val p = parts(s) ?: return DateNote(null, s)
+        val rest = s.substring(p.matched.length)
+            .trimStart(' ', '-', '/', '(', ')', ',', '.', ':', '\u061B', ';')
+            .trimEnd(')', ']')
+            .trim()
+        return DateNote("%02d/%02d/%04d".format(p.day, p.month, p.year), rest)
     }
 
     fun classify(rawValue: String?): PermitStatus {

@@ -193,9 +193,15 @@ private fun OccurrenceBody(
     Spacer(Modifier.height(12.dp))
     GroupHeading("NCM DATA")
     Spacer(Modifier.height(8.dp))
-    FieldRows(
-        listOf(strings.sendDate to day.ifEmpty { strings.notSpecified }) + fields
-    )
+    val sent = Permit.splitDateAndNote(day)
+    val sentDate = sent.date
+    val sentText = when {
+        sentDate != null && sent.note.isNotEmpty() -> sentDate + " " + sent.note
+        sentDate != null -> sentDate
+        sent.note.isNotEmpty() -> sent.note
+        else -> strings.notSpecified
+    }
+    FieldRows(listOf(strings.sendDate to sentText) + fields)
     if (extraGroup.isNotEmpty()) {
         Spacer(Modifier.height(12.dp))
         GroupHeading("ASE DATA")
@@ -253,14 +259,29 @@ private fun PermitBanner(status: PermitStatus, strings: Strings, lang: Lang) {
             Text(strings.permitTag, color = c.content, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
         }
         Spacer(Modifier.width(10.dp))
-        Text(
-            permitText(status, lang, strings),
-            color = c.content,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f, fill = false)
-        )
+        val shown = permitText(status, lang, strings)
+        Column(
+            Modifier.weight(1f, fill = false),
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                shown.date.orEmpty(),
+                color = c.content,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.End
+            )
+            if (shown.note.isNotEmpty()) {
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    shown.note,
+                    color = c.content.copy(alpha = 0.8f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.End
+                )
+            }
+        }
     }
 }
 

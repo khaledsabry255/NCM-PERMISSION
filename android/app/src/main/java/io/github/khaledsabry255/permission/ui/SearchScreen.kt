@@ -66,13 +66,13 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
     // Once a search is live, everything that isn't a result gets out of the way.
     val searchMode = if (tab == 0) indSubmitted.isNotBlank() else vehSubmitted.isNotBlank()
 
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().statusBarsPadding()) {
 
-        Header(strings, state, searchMode)
+        if (!searchMode) Header(strings, state)
 
         Column(Modifier.padding(horizontal = 14.dp)) {
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(if (searchMode) 10.dp else 12.dp))
 
             Tabs(
                 strings = strings,
@@ -83,7 +83,7 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
                 onRefresh = { attempt++ }
             )
 
-            Spacer(Modifier.height(9.dp))
+            Spacer(Modifier.height(if (searchMode) 10.dp else 12.dp))
 
             if (tab == 0) {
                 SearchCard(
@@ -142,8 +142,8 @@ private fun IndividualResults(
     LazyColumn(
         Modifier
             .fillMaxSize()
-            .padding(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(bottom = 40.dp)
     ) {
         if (results.truncated) {
@@ -181,8 +181,8 @@ private fun VehicleResults(
     LazyColumn(
         Modifier
             .fillMaxSize()
-            .padding(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(bottom = 40.dp)
     ) {
         if (results.truncated) {
@@ -195,47 +195,35 @@ private fun VehicleResults(
 }
 
 @Composable
-private fun Header(
-    strings: Strings,
-    state: LoadState,
-    searchMode: Boolean
-) {
+private fun Header(strings: Strings, state: LoadState) {
     Box(
         Modifier
             .fillMaxWidth()
             .background(Palette.BgDeep)
-            .statusBarsPadding()
-            .padding(
-                top = if (searchMode) 8.dp else 20.dp,
-                bottom = if (searchMode) 8.dp else 14.dp
-            )
+            .padding(vertical = 16.dp)
     ) {
         Column(
             Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (searchMode) {
-                NcmLogo(markSize = 21.sp, subSize = 5.8.sp, subSpacing = 2.1.sp)
-            } else {
-                NcmLogo(markSize = 40.sp, subSize = 8.6.sp, subSpacing = 2.05.sp)
+            NcmLogo(markSize = 40.sp, subSize = 8.6.sp, subSpacing = 2.05.sp)
 
-                Spacer(Modifier.height(11.dp))
+            Spacer(Modifier.height(10.dp))
 
-                val (dotColor, label) = when (state) {
-                    is LoadState.Loading -> Palette.Soon to strings.statusUpdating
-                    is LoadState.Failed -> Palette.Bad to strings.statusError
-                    is LoadState.Ready -> Palette.Ok to strings.statusOnline
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(dotColor)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(label, color = Palette.TextDim, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
-                }
+            val (dotColor, label) = when (state) {
+                is LoadState.Loading -> Palette.Soon to strings.statusUpdating
+                is LoadState.Failed -> Palette.Bad to strings.statusError
+                is LoadState.Ready -> Palette.Ok to strings.statusOnline
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(dotColor)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(label, color = Palette.TextDim, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }

@@ -83,7 +83,7 @@ fun LockScreen(
         ) {
             NcmLogo(markSize = 46.sp, subSize = 10.sp, subSpacing = 2.4.sp)
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(44.dp))
 
             Text(strings.pinLabel, color = Palette.TextDim, fontSize = 13.sp)
 
@@ -139,7 +139,7 @@ fun LockScreen(
                                                 when {
                                                     error -> Palette.Bad
                                                     filled -> Palette.Gold
-                                                    else -> Palette.Gold.copy(alpha = 0.45f)
+                                                    else -> Palette.Edge
                                                 }
                                             ),
                                             CircleShape
@@ -153,7 +153,7 @@ fun LockScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            Text(strings.pinHint, color = Color(0xFF5F6B5F), fontSize = 11.sp)
+            Text(strings.pinHint, color = Color(0xFF6B7885), fontSize = 11.sp)
 
             Spacer(Modifier.height(8.dp))
             Text(
