@@ -68,7 +68,7 @@ fun SearchScreen(strings: Strings, lang: Lang, onLangChange: (Lang) -> Unit) {
 
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
 
-        if (!searchMode) Header(strings, state)
+        Header(strings, state, searchMode)
 
         Column(Modifier.padding(horizontal = 14.dp)) {
 
@@ -195,35 +195,41 @@ private fun VehicleResults(
 }
 
 @Composable
-private fun Header(strings: Strings, state: LoadState) {
+private fun Header(strings: Strings, state: LoadState, searchMode: Boolean) {
+    // The site drops the header once a search is live; here it only steps down
+    // to a small wordmark, which is what was asked for.
     Box(
         Modifier
             .fillMaxWidth()
             .background(Palette.BgDeep)
-            .padding(vertical = 16.dp)
+            .padding(vertical = if (searchMode) 8.dp else 16.dp)
     ) {
         Column(
             Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            NcmLogo(markSize = 40.sp, subSize = 8.6.sp, subSpacing = 2.05.sp)
+            if (searchMode) {
+                NcmLogo(markSize = 21.sp, subSize = 5.8.sp, subSpacing = 2.1.sp)
+            } else {
+                NcmLogo(markSize = 40.sp, subSize = 8.6.sp, subSpacing = 2.05.sp)
 
-            Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(10.dp))
 
-            val (dotColor, label) = when (state) {
-                is LoadState.Loading -> Palette.Soon to strings.statusUpdating
-                is LoadState.Failed -> Palette.Bad to strings.statusError
-                is LoadState.Ready -> Palette.Ok to strings.statusOnline
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(dotColor)
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(label, color = Palette.TextDim, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
+                val (dotColor, label) = when (state) {
+                    is LoadState.Loading -> Palette.Soon to strings.statusUpdating
+                    is LoadState.Failed -> Palette.Bad to strings.statusError
+                    is LoadState.Ready -> Palette.Ok to strings.statusOnline
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(dotColor)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(label, color = Palette.TextDim, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
